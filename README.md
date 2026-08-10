@@ -1,4 +1,4 @@
-# Instagram Wrapped 🚀
+# Instagram Wrapped 
 
 A privacy-first Instagram analytics dashboard that lets users upload their Instagram data export ZIP and generate a personalized yearly Wrapped experience.
 
