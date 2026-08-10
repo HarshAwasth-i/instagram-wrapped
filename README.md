@@ -1,32 +1,35 @@
-# React + TypeScript + Vite
+# Instagram Wrapped 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A privacy-first Instagram analytics dashboard that lets users upload their Instagram data export ZIP and generate a personalized yearly Wrapped experience.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 📦 Upload Instagram JSON export
+- 🔒 Client-side processing (data stays on device)
+- 👥 Followers & following analysis
+- ❤️ Like statistics
+- 💬 Message insights
+- 🧠 Personality analysis
+- 🎬 Wrapped-style story experience
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- TypeScript
+- Tailwind CSS
+- Vite
+- JSZip
+- Recharts
+- Framer Motion
 
-## Expanding the Oxlint configuration
+## How it works
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+Instagram ZIP
+→ JSON Parser
+→ Analytics Engine
+→ Wrapped Stories
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+## Privacy
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+No Instagram data is uploaded to any server.
+All processing happens locally in the browser.
