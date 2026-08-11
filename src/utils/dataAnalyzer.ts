@@ -27,6 +27,12 @@ loginDevices:[],
 likesGiven:0,
 commentsCount:0,
 
+likesPerMonth:Array(12).fill(0),
+
+likeActivity:Array(24).fill(0),
+
+topLikedAccounts:[],
+
 
 
 // Messages
@@ -233,15 +239,17 @@ count:item[1]
 
 
 
-// =========================
-// LIKES
-// =========================
+
 
 
 if(data.likes?.length){
 
-
 let count=0;
+
+let monthLikes = Array(12).fill(0);
+
+let likedAccounts:any={};
+
 
 
 data.likes.forEach((item:any)=>{
@@ -249,22 +257,106 @@ data.likes.forEach((item:any)=>{
 
 if(Array.isArray(item)){
 
-count+=item.length;
+
+item.forEach((like:any)=>{
+
+
+count++;
+
+
+
+// monthly likes
+
+if(like.timestamp){
+
+const month =
+new Date(like.timestamp * 1000)
+.getMonth();
+
+
+monthLikes[month]++;
 
 }
+
+
+
+// account name
+
+let username = "";
+
+
+// New Instagram likes format
+if(like.label_values?.length){
+
+    username =
+    like.label_values[0]?.value ||
+    like.label_values[0]?.title ||
+    "";
+
+}
+
+
+// Fallback for old Instagram format
+if(!username){
+
+    username =
+    like.title ||
+    like.string_list_data?.[0]?.title ||
+    "";
+
+}
+
+
+
+if(username){
+
+
+    likedAccounts[username] =
+    (likedAccounts[username] || 0) + 1;
+
+
+}
+
 
 
 });
 
 
-analytics.likesGiven=count;
-
 
 }
 
 
 
+});
 
+
+
+analytics.likesGiven = count;
+
+
+
+analytics.likesPerMonth = monthLikes;
+
+
+
+analytics.topLikedAccounts =
+Object.entries(likedAccounts)
+.sort(
+    (a:any,b:any)=>b[1]-a[1]
+)
+.slice(0,5)
+.map(
+    ([username,count]:any)=>({
+
+        username,
+        count
+
+    })
+);
+
+
+
+}
 
 
 // =========================
@@ -709,48 +801,40 @@ count
 })
 );
 
+
+
+
+
+
+
 // =========================
-// LOGIN ANALYTICS
+// LOGIN ACTIVITY
 // =========================
-
-
-let deviceMap:any={};
-
 
 
 if(data.loginActivity?.length){
 
 
-
-data.loginActivity.forEach((file:any)=>{
-
+let loginDates:string[] = [];
 
 
-const history =
-file.account_history_login_history || [];
+data.loginActivity.forEach((item:any)=>{
 
 
-
-history.forEach((login:any)=>{
-
-
-const device =
-login.string_map_data?.["Device"]?.value ||
-login.title ||
-"Unknown Device";
+Object.values(item).forEach((value:any)=>{
 
 
+if(Array.isArray(value)){
 
-if(device !== "Unknown Device"){
 
-deviceMap[device] =
-(deviceMap[device] || 0)+1;
+value.forEach((entry:any)=>{
+
+
+if(entry.title){
+
+loginDates.push(entry.title);
 
 }
-
-
-
-});
 
 
 });
@@ -759,49 +843,30 @@ deviceMap[device] =
 }
 
 
-
-analytics.loginDevices =
-Object.keys(deviceMap);
-
-
-
-analytics.devicesUsed =
-analytics.loginDevices.length;
-
-
-
-analytics.totalLogins =
-Object.values(deviceMap)
-.reduce(
-(sum:any,value:any)=>sum+value,
-0
-);
-
-
-
-let maxDevice="";
-
-let maxCount=0;
-
-
-
-Object.entries(deviceMap)
-.forEach(([device,count]:any)=>{
-
-
-if(count>maxCount){
-
-maxCount=count;
-maxDevice=device;
-
-}
+});
 
 
 });
 
 
 
-analytics.mostUsedDevice=maxDevice;
+analytics.totalLogins = loginDates.length;
+
+
+// store latest few login dates for UI
+analytics.loginDevices = loginDates.slice(0,3);
+
+
+// Instagram does not provide actual device names
+analytics.devicesUsed = 0;
+
+
+analytics.mostUsedDevice = "";
+
+
+
+}
+
 
 // =========================
 // PERSONALITY

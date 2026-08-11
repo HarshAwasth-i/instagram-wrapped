@@ -110,7 +110,7 @@ LIKES PER MONTH
 
 
 {
-analytics.likesPerMonth.map(
+(analytics.likesPerMonth || []).map(
 (value:number,index:number)=>(
 
 <div 
@@ -225,7 +225,7 @@ h-48
 
 
 {
-analytics.likeActivity.map(
+(analytics.likeActivity || []).map(
 (value:number,index:number)=>(
 
 
@@ -324,7 +324,7 @@ TOP LIKED ACCOUNTS
 
 
 {
-analytics.topLikedAccounts.map(
+(analytics.topLikedAccounts || []).map(
 (item:any,index:number)=>(
 
 

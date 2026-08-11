@@ -62,9 +62,31 @@ setFile(selectedFile);
 
 const instagramData =
 await parseInstagramZip(selectedFile);
+
+
+// DEBUG LIKES STRUCTURE
+
 console.log(
-"LIKES RAW DATA:",
-instagramData.likes
+"LIKES LENGTH:",
+instagramData.likes.length
+);
+
+
+console.log(
+"LIKE FILE 0:",
+instagramData.likes[0]
+);
+
+
+console.log(
+"FIRST LIKE OBJECT:",
+instagramData.likes[0]?.[0]
+);
+
+
+console.log(
+"SECOND LIKE FILE FIRST OBJECT:",
+instagramData.likes[2]?.[0]
 );
 
 console.log(
@@ -76,6 +98,10 @@ instagramData.searches
 console.log(
 "LOGIN RAW DATA:",
 instagramData.loginActivity
+);
+console.log(
+"LOGIN SAMPLE:",
+instagramData.loginActivity[1]
 );
 setInstagramData(instagramData);
 
