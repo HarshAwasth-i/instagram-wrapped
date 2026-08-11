@@ -8,19 +8,27 @@ export const InstagramContext = createContext<any>(null);
 export function InstagramProvider({children}:any){
 
 
-const saved =
+const savedAnalytics =
 localStorage.getItem("instagramAnalytics");
 
 
 
 const [analytics,setAnalyticsState] =
-useState<any>(
-saved ? JSON.parse(saved) : null
+useState(
+savedAnalytics 
+? JSON.parse(savedAnalytics)
+: null
 );
 
 
 
+const [instagramData,setInstagramData] =
+useState<any>(null);
+
+
+
 function setAnalytics(data:any){
+
 
 localStorage.setItem(
 "instagramAnalytics",
@@ -29,6 +37,7 @@ JSON.stringify(data)
 
 
 setAnalyticsState(data);
+
 
 }
 
@@ -40,7 +49,9 @@ return(
 
 value={{
 analytics,
-setAnalytics
+setAnalytics,
+instagramData,
+setInstagramData
 }}
 
 >
@@ -50,5 +61,6 @@ setAnalytics
 </InstagramContext.Provider>
 
 )
+
 
 }

@@ -1,16 +1,25 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 import { InstagramContext } from "../context/InstagramContext";
 
-import ActivityChart from "../components/ActivityChart";
+import DashboardHeader from "../components/dashboard/DashboardHeader";
+import CategoryTabs from "../components/dashboard/CategoryTabs";
 
-import IntroStory from "../components/stories/IntroStory";
-import FollowersStory from "../components/stories/FollowersStory";
+import MessageStats from "../components/dashboard/MessageStats";
+import MessageHighlights from "../components/dashboard/MessageHighlights";
+
+import LikesSection from "../components/dashboard/LikesSection";
+import ContentSection from "../components/dashboard/ContentSection";
+import ConnectionsSection from "../components/sections/ConnectionsSection";
 
 
 function Dashboard(){
 
-const {analytics} = useContext(InstagramContext);
+
+const {analytics}=useContext(InstagramContext);
+
+
+const [activeTab,setActiveTab]=useState("Messages");
 
 
 
@@ -18,17 +27,9 @@ if(!analytics){
 
 return(
 
-<div className="
-h-screen
-flex
-items-center
-justify-center
-bg-black
-text-white
-text-3xl
-">
+<div className="text-white">
 
-Upload your Instagram ZIP first 🚀
+Upload Instagram ZIP first
 
 </div>
 
@@ -40,73 +41,117 @@ Upload your Instagram ZIP first 🚀
 
 return(
 
-<div className="relative">
+
+<div className="
+min-h-screen
+bg-black
+text-white
+">
 
 
-{/* Back Button */}
-
-<button
-
-onClick={()=>{
-window.location.href="/upload";
-}}
-
-className="
-fixed
-top-6
-left-6
-z-50
-bg-white
-text-black
-px-5
-py-2
-rounded-full
-font-semibold
-hover:scale-105
-transition
-"
-
->
-
-← Upload Again
-
-</button>
+<DashboardHeader/>
 
 
-
-{/* Intro */}
-
-<IntroStory />
-
-
-
-{/* Followers */}
-
-<FollowersStory
-
-count={analytics.followersCount}
-
+<CategoryTabs
+activeTab={activeTab}
+setActiveTab={setActiveTab}
 />
 
 
 
-{/* Chart */}
-
 <div className="
-bg-black
-min-h-screen
-p-10
+px-10
+mt-10
 ">
 
-<ActivityChart />
 
-</div>
+{
+activeTab==="Messages" && (
+
+<>
+
+<h2 className="
+text-4xl
+font-bold
+text-center
+">
+
+💬 Messages
+
+</h2>
 
 
+<MessageStats/>
+
+<MessageHighlights/>
+
+</>
+
+)
+
+}
+
+
+
+
+{
+activeTab==="Likes" && (
+
+<LikesSection/>
+
+)
+
+}
+
+
+
+
+{
+activeTab==="Content" && (
+
+<ContentSection/>
+
+)
+
+}
+
+
+
+
+{
+activeTab==="Connections" && (
+
+<ConnectionsSection/>
+
+)
+}
+
+
+
+
+{
+activeTab==="Personality" && (
+
+<div className="text-white text-3xl">
+
+Personality Coming Soon
 
 </div>
 
 )
+
+}
+
+
+
+</div>
+
+
+</div>
+
+
+)
+
 
 }
 

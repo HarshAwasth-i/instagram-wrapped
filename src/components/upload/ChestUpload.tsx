@@ -1,38 +1,29 @@
-import { UploadCloud } from "lucide-react";
 import { motion } from "framer-motion";
 
 import {
 useRef,
 useState,
 useContext
-}
-from "react";
-
+} from "react";
 
 import {
 parseInstagramZip
-}
-from "../../utils/zipParser";
-
+} from "../../utils/zipParser";
 
 import {
 analyzeInstagramData
-}
-from "../../utils/dataAnalyzer";
-
+} from "../../utils/dataAnalyzer";
 
 import {
 InstagramContext
-}
-from "../../context/InstagramContext";
+} from "../../context/InstagramContext";
 
 
 
 function ChestUpload(){
 
-
 const inputRef =
-useRef<HTMLInputElement>(null);
+useRef<HTMLInputElement | null>(null);
 
 
 
@@ -41,8 +32,10 @@ useState<File | null>(null);
 
 
 
-const {setAnalytics} =
-useContext(InstagramContext);
+const {
+setAnalytics,
+setInstagramData
+}=useContext(InstagramContext);
 
 
 
@@ -69,16 +62,49 @@ setFile(selectedFile);
 
 const instagramData =
 await parseInstagramZip(selectedFile);
+console.log(
+"LIKES RAW DATA:",
+instagramData.likes
+);
+
+console.log(
+"SEARCH RAW DATA:",
+instagramData.searches
+);
+
+
+console.log(
+"LOGIN RAW DATA:",
+instagramData.loginActivity
+);
+setInstagramData(instagramData);
+
+
+
+console.log(
+"Parsed Instagram Data:",
+instagramData
+);
+
+
+
+// SAVE COMPLETE INSTAGRAM DATA ✅
+
+setInstagramData(instagramData);
+
 
 
 
 const analytics =
 analyzeInstagramData(instagramData);
 
+
+
 console.log(
 "Instagram Analytics:",
 analytics
 );
+
 
 
 setAnalytics(analytics);
@@ -90,8 +116,8 @@ setAnalytics(analytics);
 
 
 
-
 return(
+
 
 <motion.div
 
@@ -126,7 +152,6 @@ onDrop={(e)=>{
 
 e.preventDefault();
 
-
 const dropped =
 e.dataTransfer.files[0];
 
@@ -136,7 +161,6 @@ if(dropped){
 handleFile(dropped);
 
 }
-
 
 }}
 
@@ -158,7 +182,6 @@ cursor-pointer
 hover:bg-white/10
 transition
 "
-
 
 >
 
@@ -195,10 +218,7 @@ handleFile(selected);
 
 
 
-<div className="
-text-7xl
-mb-8
-">
+<div className="text-6xl mb-8">
 
 🧰
 
@@ -207,17 +227,9 @@ mb-8
 
 
 <div className="
-flex
-items-center
-gap-3
-text-white
-text-xl
+text-2xl
 font-bold
 ">
-
-
-<UploadCloud/>
-
 
 {
 
@@ -229,17 +241,14 @@ file.name
 
 }
 
-
 </div>
 
 
 
-
-<p className="
+<div className="
+mt-5
 text-gray-400
-mt-4
 ">
-
 
 {
 
@@ -251,17 +260,16 @@ file
 
 }
 
-
-</p>
+</div>
 
 
 
 </motion.div>
 
+
 )
 
 }
-
 
 
 export default ChestUpload;
