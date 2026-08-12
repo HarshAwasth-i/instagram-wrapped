@@ -61,6 +61,7 @@ topFriends:[],
 
 // Personality
 personality:"",
+personalityCards:[],
 
 
 
@@ -288,21 +289,60 @@ let username = "";
 // New Instagram likes format
 if(like.label_values?.length){
 
-    username =
-    like.label_values[0]?.value ||
-    like.label_values[0]?.title ||
-    "";
+
+like.label_values.forEach((label:any)=>{
+
+
+let value =
+label.value ||
+label.title ||
+"";
+
+
+
+if(value.includes("instagram.com")){
+
+
+let parts =
+value.split("/");
+
+
+// Find username after instagram.com
+let index =
+parts.indexOf("instagram.com");
+
+
+if(index !== -1 && parts[index + 1]){
+
+username = parts[index + 1];
 
 }
+
+
+}
+else if(value && !username){
+
+username=value;
+
+}
+
+
+});
+
+
+}
+
 
 
 // Fallback for old Instagram format
 if(!username){
 
-    username =
-    like.title ||
-    like.string_list_data?.[0]?.title ||
-    "";
+
+username =
+like.title ||
+like.string_list_data?.[0]?.title ||
+"";
+
 
 }
 
@@ -874,32 +914,117 @@ analytics.mostUsedDevice = "";
 
 
 let personality=[];
+let cards=[];
 
 
 
 if(analytics.messagesCount>50000){
 
-personality.push("💬 Chat Machine");
+
+personality.push("Chat Machine");
+
+
+cards.push({
+
+title:"Social Builder",
+
+emoji:"🧱",
+
+description:"Maintains many active conversations",
+
+score:5
+
+});
+
 
 }
 else if(analytics.messagesCount>10000){
 
-personality.push("💬 Social Butterfly");
+
+personality.push("Social Butterfly");
+
+
+cards.push({
+
+title:"Social Butterfly",
+
+emoji:"💬",
+
+description:"Always keeping conversations alive",
+
+score:4
+
+});
+
 
 }
+
+
 
 
 
 if(analytics.likesGiven>20000){
 
-personality.push("❤️ Like Machine");
+
+personality.push("Like Machine");
+
+
+cards.push({
+
+title:"Like Machine",
+
+emoji:"❤️",
+
+description:"Shows love across Instagram",
+
+score:5
+
+});
+
 
 }
 else if(analytics.likesGiven>5000){
 
-personality.push("❤️ Supportive Friend");
+
+cards.push({
+
+title:"Supportive Friend",
+
+emoji:"💖",
+
+description:"Always engaging with others",
+
+score:3
+
+});
+
 
 }
+
+
+
+if(analytics.postsCount<10){
+
+
+cards.push({
+
+title:"Silent Observer",
+
+emoji:"👀",
+
+description:"Likes more than posts",
+
+score:5
+
+});
+
+
+}
+
+
+
+
+analytics.personalityCards=cards;
 
 
 

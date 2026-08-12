@@ -11,6 +11,7 @@ import MessageHighlights from "../components/dashboard/MessageHighlights";
 import LikesSection from "../components/dashboard/LikesSection";
 import ContentSection from "../components/dashboard/ContentSection";
 import ConnectionsSection from "../components/sections/ConnectionsSection";
+import PersonalitySection from "../components/sections/PersonalitySection";
 
 
 function Dashboard(){
@@ -132,14 +133,9 @@ activeTab==="Connections" && (
 {
 activeTab==="Personality" && (
 
-<div className="text-white text-3xl">
-
-Personality Coming Soon
-
-</div>
+<PersonalitySection/>
 
 )
-
 }
 
 

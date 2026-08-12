@@ -1,10 +1,13 @@
 import { motion } from "framer-motion";
 
+
 import {
 useRef,
 useState,
 useContext
 } from "react";
+
+import { useNavigate } from "react-router-dom";
 
 import {
 parseInstagramZip
@@ -24,6 +27,7 @@ function ChestUpload(){
 
 const inputRef =
 useRef<HTMLInputElement | null>(null);
+const navigate = useNavigate();
 
 
 
@@ -131,6 +135,14 @@ console.log(
 analytics
 );
 
+setAnalytics(analytics);
+
+
+setTimeout(()=>{
+
+navigate("/dashboard");
+
+},800);
 
 
 setAnalytics(analytics);
