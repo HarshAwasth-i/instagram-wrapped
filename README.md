@@ -32,4 +32,4 @@ Instagram ZIP
 ## Privacy
 
 No Instagram data is uploaded to any server.
-All processing happens locally in the browser.
+All processing happens locally in the browser.No data is leaked
