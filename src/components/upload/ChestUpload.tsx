@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 
-
 import {
 useRef,
 useState,
@@ -9,13 +8,16 @@ useContext
 
 import { useNavigate } from "react-router-dom";
 
+
 import {
 parseInstagramZip
 } from "../../utils/zipParser";
 
+
 import {
 analyzeInstagramData
 } from "../../utils/dataAnalyzer";
+
 
 import {
 InstagramContext
@@ -25,14 +27,18 @@ InstagramContext
 
 function ChestUpload(){
 
+
+const navigate = useNavigate();
+
+
 const inputRef =
 useRef<HTMLInputElement | null>(null);
-const navigate = useNavigate();
 
 
 
 const [file,setFile] =
 useState<File | null>(null);
+const [loading,setLoading] = useState(false);
 
 
 
@@ -61,93 +67,69 @@ return;
 
 
 setFile(selectedFile);
+setLoading(true);
 
 
 
-const instagramData =
-await parseInstagramZip(selectedFile);
+try {
+
+  const instagramData =
+    await parseInstagramZip(selectedFile);
 
 
-// DEBUG LIKES STRUCTURE
-
-console.log(
-"LIKES LENGTH:",
-instagramData.likes.length
-);
+  console.log(
+    "FIRST LIKE ITEM:",
+    instagramData.likes[0]?.[0]
+  );
 
 
-console.log(
-"LIKE FILE 0:",
-instagramData.likes[0]
-);
+  console.log(
+    "SEARCH RAW DATA:",
+    instagramData.searches
+  );
 
 
-console.log(
-"FIRST LIKE OBJECT:",
-instagramData.likes[0]?.[0]
-);
-
-
-console.log(
-"SECOND LIKE FILE FIRST OBJECT:",
-instagramData.likes[2]?.[0]
-);
-
-console.log(
-"SEARCH RAW DATA:",
-instagramData.searches
-);
-
-
-console.log(
-"LOGIN RAW DATA:",
-instagramData.loginActivity
-);
-console.log(
-"LOGIN SAMPLE:",
-instagramData.loginActivity[1]
-);
-setInstagramData(instagramData);
+  console.log(
+    "LOGIN RAW DATA:",
+    instagramData.loginActivity
+  );
 
 
 
-console.log(
-"Parsed Instagram Data:",
-instagramData
-);
+  setInstagramData(instagramData);
+
+
+  console.log(
+    "Parsed Instagram Data:",
+    instagramData
+  );
 
 
 
-// SAVE COMPLETE INSTAGRAM DATA ✅
-
-setInstagramData(instagramData);
-
+  const analytics =
+    analyzeInstagramData(instagramData);
 
 
-
-const analytics =
-analyzeInstagramData(instagramData);
-
-
-
-console.log(
-"Instagram Analytics:",
-analytics
-);
-
-setAnalytics(analytics);
+  console.log(
+    "Instagram Analytics:",
+    analytics
+  );
 
 
-setTimeout(()=>{
+  setAnalytics(analytics);
 
-navigate("/dashboard");
+  navigate("/dashboard");
 
-},800);
+} catch (err) {
 
+  console.error("Failed to parse ZIP:", err);
+  alert("Failed to parse the Instagram ZIP. Please make sure it is a valid Instagram data export.");
 
-setAnalytics(analytics);
+} finally {
 
+  setLoading(false);
 
+}
 
 }
 
@@ -156,18 +138,20 @@ setAnalytics(analytics);
 
 return(
 
-
 <motion.div
+
 
 initial={{
 opacity:0,
 y:40
 }}
 
+
 animate={{
 opacity:1,
 y:0
 }}
+
 
 transition={{
 duration:0.8
@@ -190,6 +174,7 @@ onDrop={(e)=>{
 
 e.preventDefault();
 
+
 const dropped =
 e.dataTransfer.files[0];
 
@@ -199,6 +184,7 @@ if(dropped){
 handleFile(dropped);
 
 }
+
 
 }}
 
@@ -224,15 +210,21 @@ transition
 >
 
 
+
 <input
+
 
 ref={inputRef}
 
+
 type="file"
+
 
 accept=".zip"
 
+
 hidden
+
 
 
 onChange={(e)=>{
@@ -256,49 +248,68 @@ handleFile(selected);
 
 
 
-<div className="text-6xl mb-8">
-
 🧰
 
+
+
+{
+loading ?
+
+<>
+<div className="text-3xl">
+⛏️
+</div>
+
+<div className="
+text-xl
+mt-5
+text-[#d8cfb5]
+">
+MINING YOUR DATA...
+</div>
+
+<div className="
+text-gray-400
+mt-2
+">
+Extracting chunks from your Instagram world
+</div>
+</>
+
+:
+
+<>
+
+<div className="text-5xl">
+🧰
 </div>
 
 
-
-<div className="
-text-2xl
-font-bold
-">
-
+<div className="mt-5">
 {
-
 file
 ?
 file.name
 :
 "DROP YOUR ZIP"
-
 }
-
 </div>
 
 
-
-<div className="
-mt-5
-text-gray-400
-">
-
+<div className="text-gray-400">
 {
-
 file
 ?
 "Ready to analyze"
 :
 "or click to browse"
+}
+</div>
+
+
+</>
 
 }
-
-</div>
 
 
 
@@ -306,6 +317,7 @@ file
 
 
 )
+
 
 }
 

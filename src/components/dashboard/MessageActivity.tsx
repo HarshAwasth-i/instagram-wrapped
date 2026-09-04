@@ -14,6 +14,7 @@ return null;
 const hours = analytics.hourActivity;
 
 const max = Math.max(...hours);
+const safeMax = max || 1;
 
 
 
@@ -87,7 +88,7 @@ duration-500
 
 style={{
 
-height:`${(value/max)*100}%`
+height:`${(value/safeMax)*100}%`
 
 }}
 

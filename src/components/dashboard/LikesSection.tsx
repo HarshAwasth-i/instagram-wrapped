@@ -20,10 +20,10 @@ const months=[
 
 
 const maxMonth=Math.max(...analytics.likesPerMonth);
-
-
+const safeMaxMonth = maxMonth || 1;
 
 const maxHour=Math.max(...analytics.likeActivity);
+const safeMaxHour = maxHour || 1;
 
 
 
@@ -146,7 +146,7 @@ overflow-hidden
 <div
 
 style={{
-width:`${(value/maxMonth)*100}%`
+width:`${(value/safeMaxMonth)*100}%`
 }}
 
 className="
@@ -243,7 +243,7 @@ gap-2
 <div
 
 style={{
-height:`${(value/maxHour)*100}%`
+height:`${(value/safeMaxHour)*100}%`
 }}
 
 className="

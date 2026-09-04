@@ -26,6 +26,8 @@ const maxValue=Math.max(
 
 );
 
+const safeMax = maxValue || 1;
+
 
 
 return(
@@ -251,7 +253,7 @@ gap-1
 
 style={{
 height:
-`${(analytics.contentTimeline.reels[index]/maxValue)*100}%`
+`${(analytics.contentTimeline.reels[index]/safeMax)*100}%`
 }}
 
 className="
@@ -273,7 +275,7 @@ min-h-[2px]
 
 style={{
 height:
-`${(analytics.contentTimeline.posts[index]/maxValue)*100}%`
+`${(analytics.contentTimeline.posts[index]/safeMax)*100}%`
 }}
 
 className="
@@ -295,7 +297,7 @@ min-h-[2px]
 
 style={{
 height:
-`${(analytics.contentTimeline.stories[index]/maxValue)*100}%`
+`${(analytics.contentTimeline.stories[index]/safeMax)*100}%`
 }}
 
 className="

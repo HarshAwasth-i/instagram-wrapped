@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { InstagramContext } from "../../context/InstagramContext";
-import {cleanText} from "../../utils/cleanText";
 
 
 function TopFriends(){
@@ -8,12 +7,8 @@ function TopFriends(){
 const {analytics}=useContext(InstagramContext);
 
 
-if(!analytics?.topFriends)
+if(!analytics)
 return null;
-
-
-
-const total = analytics.messagesCount;
 
 
 
@@ -21,12 +16,12 @@ return(
 
 <div
 className="
-mt-10
-bg-white/5
+bg-black/40
 border
 border-white/10
 rounded-2xl
-p-8
+p-10
+mt-10
 "
 >
 
@@ -35,9 +30,8 @@ p-8
 className="
 text-3xl
 font-bold
-text-lime-400
+text-[#e8dcc0]
 mb-8
-text-center
 "
 >
 
@@ -47,14 +41,13 @@ text-center
 
 
 
-<div
-className="
-space-y-6
-"
->
+<div className="space-y-5">
 
 
 {
+analytics.topFriends?.length
+?
+
 analytics.topFriends.map(
 (friend:any,index:number)=>(
 
@@ -62,11 +55,12 @@ analytics.topFriends.map(
 <div
 key={index}
 className="
-bg-black/40
-border
-border-white/10
+flex
+justify-between
+items-center
+bg-white/5
 rounded-xl
-p-6
+p-5
 "
 >
 
@@ -74,54 +68,45 @@ p-6
 <div
 className="
 flex
-justify-between
 items-center
+gap-5
 "
 >
 
 
-<div>
-
-<h3
+<div
 className="
-text-xl
-font-bold
-"
->
-
-#{index+1} {cleanText(friend.name)}
-
-</h3>
-
-
-<p
-className="
-text-gray-400
-mt-2
-"
->
-
-{friend.count} messages
-
-</p>
-
-</div>
-
-
-
-<p
-className="
-text-lime-400
-font-bold
+text-3xl
 "
 >
 
 {
-((friend.count/total)*100)
-.toFixed(1)
+index===0
+?
+"👑"
+:
+index===1
+?
+"🥈"
+:
+index===2
+?
+"🥉"
+:
+"⭐"
 }
 
-%
+</div>
+
+
+<p
+className="
+text-xl
+text-[#e8dcc0]
+"
+>
+
+{friend.name}
 
 </p>
 
@@ -130,38 +115,18 @@ font-bold
 
 
 
-<div
+<p
 className="
-mt-4
-h-3
-bg-white/10
-rounded-full
-overflow-hidden
+text-xl
+text-lime-300
+font-bold
 "
 >
 
+{friend.count}
 
-<div
+</p>
 
-className="
-h-full
-bg-lime-400
-"
-
-style={{
-
-width:
-`${(friend.count/total)*100}%`
-
-}}
-
->
-
-
-</div>
-
-
-</div>
 
 
 </div>
@@ -170,6 +135,14 @@ width:
 )
 
 )
+
+:
+
+<p className="text-gray-500">
+
+No conversations found
+
+</p>
 
 }
 
@@ -177,7 +150,9 @@ width:
 </div>
 
 
+
 </div>
+
 
 )
 

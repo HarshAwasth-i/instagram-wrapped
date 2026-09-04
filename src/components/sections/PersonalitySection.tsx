@@ -11,36 +11,88 @@ if(!analytics)
 return null;
 
 
-const cards = analytics.personalityCards || [];
+
+const personalities=[
+
+
+{
+title:"Social Builder",
+emoji:"🧱",
+description:"Maintains many active conversations",
+condition: analytics.messagesCount > 10000
+},
+
+
+{
+title:"Like Machine",
+emoji:"❤️",
+description:"Shows love across Instagram",
+condition: analytics.likesGiven > 20000
+},
+
+
+{
+title:"Silent Observer",
+emoji:"👀",
+description:"Likes more than talks",
+condition:
+analytics.likesGiven > analytics.sentMessages
+},
+
+
+{
+title:"Ghost Poster",
+emoji:"👻",
+description:"Rarely posts but always online",
+condition:
+analytics.postsCount < 5
+},
+
+
+{
+title:"Loyal Friend",
+emoji:"💕",
+description:"Has a bestie they message constantly",
+condition:
+analytics.topFriend
+}
+
+
+
+];
+
 
 
 return(
 
-<div className="space-y-10">
-
 
 <div className="
-text-center
-text-4xl
+space-y-10
+">
+
+
+<h1 className="
+text-5xl
 font-bold
+text-center
 text-[#e8dcc0]
 ">
 
 🏆 YOUR PERSONALITY
 
-</div>
+</h1>
 
 
-
-<div className="
+<p className="
 text-center
-text-gray-400
 text-xl
+text-gray-400
 ">
 
 Based on your Instagram activity
 
-</div>
+</p>
+
 
 
 
@@ -52,8 +104,11 @@ gap-8
 
 
 {
-cards.map(
-(card:any,index:number)=>(
+
+personalities
+.filter(item => item.condition)
+.map(
+(item,index)=>(
 
 
 <div
@@ -63,16 +118,17 @@ bg-black/40
 border
 border-white/10
 rounded-2xl
-p-8
+p-10
 "
 >
 
 
 <div className="text-6xl">
 
-{card.emoji}
+{item.emoji}
 
 </div>
+
 
 
 <h2 className="
@@ -81,28 +137,31 @@ text-[#e8dcc0]
 mt-5
 ">
 
-{card.title}
+{item.title}
 
 </h2>
 
 
+
 <div className="
-text-yellow-300
+text-yellow-400
 text-2xl
 mt-3
 ">
 
-{"⭐".repeat(card.score)}
+⭐⭐⭐⭐⭐
 
 </div>
 
 
+
 <p className="
-text-gray-400
+text-gray-300
 mt-5
+text-lg
 ">
 
-{card.description}
+{item.description}
 
 </p>
 
@@ -112,8 +171,8 @@ mt-5
 
 )
 
-)
 
+)
 
 }
 
@@ -121,10 +180,11 @@ mt-5
 </div>
 
 
+
 </div>
 
-)
 
+)
 
 }
 

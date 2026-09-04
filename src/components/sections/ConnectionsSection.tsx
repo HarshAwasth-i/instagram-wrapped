@@ -11,10 +11,9 @@ if(!analytics)
 return null;
 
 
-
 return(
 
-<div className="space-y-12">
+<div className="space-y-12 pb-20">
 
 
 {/* HEADER */}
@@ -35,17 +34,17 @@ text-[#e8dcc0]
 
 
 
-
 {/* CONNECTION CARDS */}
 
 <div
 className="
 grid
-grid-cols-4
+grid-cols-1
+md:grid-cols-2
+lg:grid-cols-4
 gap-6
 "
 >
-
 
 
 {
@@ -97,21 +96,22 @@ transition
 
 
 <div className="text-5xl">
+
 {card.icon}
+
 </div>
 
 
-<h2
-className="
+<h2 className="
 mt-5
 text-xl
 text-[#d8cfb5]
-"
->
+">
 
 {card.title}
 
 </h2>
+
 
 
 <p
@@ -133,13 +133,11 @@ ${card.color}
 
 ))
 
+
 }
 
 
-
 </div>
-
-
 
 
 
@@ -156,7 +154,8 @@ border-white/10
 rounded-2xl
 p-10
 grid
-grid-cols-2
+grid-cols-1
+md:grid-cols-2
 gap-10
 "
 >
@@ -165,11 +164,10 @@ gap-10
 
 <div>
 
-
 <h2
 className="
 text-3xl
-text-[#d8cfb5]
+text-[#d8dcc0]
 "
 >
 
@@ -192,13 +190,11 @@ mt-8
 </p>
 
 
-<p
-className="
+<p className="
 text-gray-400
 text-xl
 mt-2
-"
->
+">
 
 Total Searches
 
@@ -211,14 +207,13 @@ Total Searches
 
 
 
-
 <div>
 
 
 <h2
 className="
 text-3xl
-text-[#d8cfb5]
+text-[#d8dcc0]
 "
 >
 
@@ -239,15 +234,12 @@ text-[#e8dcc0]
 
 
 {
-
 analytics.topSearches.length ?
 
 analytics.topSearches.map(
 (item:any,index:number)=>(
 
-<li
-key={index}
->
+<li key={index}>
 
 {index+1}. {item.username}
 
@@ -265,7 +257,6 @@ No search data
 
 </p>
 
-
 }
 
 
@@ -273,8 +264,8 @@ No search data
 </ol>
 
 
-</div>
 
+</div>
 
 
 </div>
@@ -286,7 +277,6 @@ No search data
 
 
 {/* LOGIN ACTIVITY */}
-
 
 
 <div
@@ -304,7 +294,7 @@ p-10
 <h2
 className="
 text-3xl
-text-[#d8cfb5]
+text-[#d8dcc0]
 "
 >
 
@@ -319,7 +309,8 @@ text-[#d8cfb5]
 <div
 className="
 grid
-grid-cols-3
+grid-cols-1
+md:grid-cols-3
 gap-10
 mt-10
 "
@@ -329,14 +320,11 @@ mt-10
 
 <div>
 
-
-<p
-className="
+<p className="
 text-5xl
 font-bold
 text-white
-"
->
+">
 
 {analytics.totalLogins}
 
@@ -356,20 +344,15 @@ Total Logins
 
 
 
-
-
 <div>
 
-
-<p
-className="
+<p className="
 text-5xl
 font-bold
 text-white
-"
->
+">
 
-{analytics.devicesUsed || "—"}
+—
 
 </p>
 
@@ -388,66 +371,43 @@ Devices Used
 
 
 
-
-<div
-className="
-flex
-items-center
-justify-center
-"
->
-
-
 <div
 className="
 border
 border-[#e8dcc0]
 rounded-xl
-px-8
-py-5
+p-6
 text-center
 "
 >
 
 
-<p
-className="
-text-xl
-text-[#e8dcc0]
-"
->
+<p className="
+text-3xl
+">
 
 📱
 
 </p>
 
 
-<p
-className="
-text-xl
+<p className="
 text-[#e8dcc0]
-"
->
+text-xl
+mt-2
+">
 
-{
-analytics.loginDevices?.length
-?
-"Recent Activity"
-:
-"Not Available"
-}
+Recent Activity
 
 </p>
 
 
-<p
-className="
+<p className="
 text-gray-400
 mt-2
-"
->
+">
 
-Most Used
+Latest logins
 
 </p>
 
@@ -456,10 +416,6 @@ Most Used
 
 
 
-</div>
-
-
-
 
 </div>
 
@@ -468,46 +424,99 @@ Most Used
 
 
 
-{/* DEVICE TAGS */}
+
+{/* RECENT LOGIN TAGS */}
 
 
 <div
 className="
-flex
-gap-4
-mt-8
+grid
+grid-cols-1
+md:grid-cols-3
+gap-5
+mt-10
 "
 >
 
 
 {
-analytics.loginDevices?.length
-?
-analytics.loginDevices
-.slice(0,3)
-.map((date:string,index:number)=>(
+analytics.loginDevices?.slice(0,3)
+.map(
+(date:string,index:number)=>(
+
 
 <div
 key={index}
 className="
 bg-white/10
 rounded-xl
-p-4
+p-5
 text-center
 "
 >
 
+<p className="text-2xl">
 📱
-
-<p className="text-sm mt-2">
-{date}
 </p>
+
+
+<p
+className="
+text-lg
+text-[#e8dcc0]
+mt-3
+"
+>
+{
+new Date(date).toLocaleDateString(
+"en-US",
+{
+month:"long",
+day:"numeric",
+year:"numeric"
+}
+)
+}
+</p>
+
+
+<p
+className="
+text-sm
+text-gray-400
+mt-1
+"
+>
+{
+new Date(date).toLocaleTimeString(
+"en-US",
+{
+hour:"numeric",
+minute:"2-digit"
+}
+)
+}
+</p>
+
+
+<p
+className="
+text-xs
+text-gray-500
+mt-2
+"
+>
+Login #{index+1}
+</p>
+
 
 </div>
 
-))
-:
-null
+
+)
+
+)
+
 }
 
 
@@ -516,14 +525,13 @@ null
 
 
 
-
 </div>
 
 
 
 
-
 </div>
+
 
 )
 
