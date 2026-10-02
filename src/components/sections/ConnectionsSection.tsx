@@ -49,34 +49,33 @@ gap-6
 
 {
 [
-{
-icon:"👥",
-title:"Followers",
-value:analytics.followersCount,
-color:"text-lime-300"
-},
+  {
+    icon: "👥",
+    title: "Followers",
+    value: analytics.followersCount,
+    color: "text-lime-300"
+  },
 
-{
-icon:"👤+",
-title:"New",
-value:analytics.newFollowers,
-color:"text-green-400"
-},
+  {
+    icon: "📈",
+    title: "Following",
+    value: analytics.followingCount,
+    color: "text-[#e8dcc0]"
+  },
 
-{
-icon:"📈",
-title:"Following",
-value:analytics.followingCount,
-color:"text-[#e8dcc0]"
-},
+  {
+    icon: "🤝",
+    title: "Mutuals",
+    value: analytics.mutualFollowers,
+    color: "text-[#e8dcc0]"
+  },
 
-{
-icon:"👥",
-title:"Mutuals",
-value:`≈${analytics.mutualFollowers}`,
-color:"text-[#e8dcc0]"
-}
-
+  {
+    icon: "🚫",
+    title: "Not Following Back",
+    value: analytics.notFollowingBack,
+    color: "text-red-400"
+  }
 ].map((card,index)=>(
 
 

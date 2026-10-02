@@ -18,19 +18,24 @@ posts:any[];
 
 export interface InstagramAnalytics {
 
+  followersCount: number;
 
-followersCount:number;
+  followingCount: number;
 
-followingCount:number;
+  mutualFollowers: number;
 
-likesGiven:number;
+  notFollowingBack: number;
 
-commentsCount:number;
+  notFollowingYou: number;
 
-messagesCount:number;
+  likesGiven: number;
 
-topFriend:string;
+  commentsCount: number;
 
-personality:string;
+  messagesCount: number;
+
+  topFriend: string;
+
+  personality: string;
 
 }

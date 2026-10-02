@@ -12,7 +12,9 @@ export function analyzeInstagramData(data: any) {
     followingCount: 0,
 
     // Connections
-    newFollowers: 0,
+
+    notFollowingBack: 0,
+    notFollowingYou: 0,
     mutualFollowers: 0,
 
     totalSearches: 0,
@@ -66,46 +68,168 @@ export function analyzeInstagramData(data: any) {
   };
 
 
-  // =========================
-  // FOLLOWERS
-  // =========================
+// =========================
+// FOLLOWERS & FOLLOWING
+// =========================
 
-  if (data.followers?.length) {
-    let count = 0;
-    data.followers.forEach((item: any) => {
-      if (Array.isArray(item)) {
-        item.forEach((user: any) => {
-          if (user.string_list_data) {
-            count += user.string_list_data.length;
+// Store usernames in Sets so we can compare
+// followers and following efficiently.
+const followerSet = new Set<string>();
+const followingSet = new Set<string>();
+
+
+// =========================
+// FOLLOWERS
+// =========================
+
+if (data.followers?.length) {
+
+  data.followers.forEach((file: any) => {
+
+    // Some Instagram exports contain
+    // the users directly as an array.
+    if (Array.isArray(file)) {
+
+      file.forEach((user: any) => {
+
+        if (user.string_list_data) {
+
+          user.string_list_data.forEach((item: any) => {
+
+            if (item.value) {
+              followerSet.add(item.value);
+            }
+
+          });
+
+        }
+
+      });
+
+    }
+
+    // Other exports may contain
+    // relationships_followers.
+    else if (file.relationships_followers) {
+
+      file.relationships_followers.forEach((user: any) => {
+
+        user.string_list_data?.forEach((item: any) => {
+
+          if (item.value) {
+            followerSet.add(item.value);
           }
+
         });
-      } else if (item.string_list_data) {
-        count += item.string_list_data.length;
-      }
-    });
-    analytics.followersCount = count;
+
+      });
+
+    }
+
+    // Direct string_list_data fallback
+    else if (file.string_list_data) {
+
+      file.string_list_data.forEach((item: any) => {
+
+        if (item.value) {
+          followerSet.add(item.value);
+        }
+
+      });
+
+    }
+
+  });
+
+}
+
+
+// =========================
+// FOLLOWING
+// =========================
+
+if (data.following?.length) {
+
+  data.following.forEach((user: any) => {
+
+    // Standard Instagram format
+    if (user.string_list_data) {
+
+      user.string_list_data.forEach((item: any) => {
+
+        if (item.value) {
+          followingSet.add(item.value);
+        }
+
+      });
+
+    }
+
+  });
+
+}
+
+
+// =========================
+// COUNTS
+// =========================
+
+analytics.followersCount = followerSet.size;
+analytics.followingCount = followingSet.size;
+
+
+// =========================
+// MUTUAL FOLLOWERS
+// =========================
+
+// People who follow you AND you follow them.
+let mutualCount = 0;
+
+followerSet.forEach((username) => {
+
+  if (followingSet.has(username)) {
+    mutualCount++;
   }
 
+});
 
-  // =========================
-  // FOLLOWING
-  // =========================
+analytics.mutualFollowers = mutualCount;
 
-  if (data.following?.length) {
-    let count = 0;
-    data.following.forEach((item: any) => {
-      if (item.string_list_data) {
-        count += item.string_list_data.length;
-      }
-    });
-    analytics.followingCount = count;
 
-    analytics.newFollowers = Math.floor(analytics.followersCount * 0.1);
-    analytics.mutualFollowers = Math.min(
-      analytics.followersCount,
-      analytics.followingCount
-    );
+// =========================
+// NOT FOLLOWING BACK
+// =========================
+
+// People you follow who don't follow you back.
+let notFollowingBack = 0;
+
+followingSet.forEach((username) => {
+
+  if (!followerSet.has(username)) {
+    notFollowingBack++;
   }
+
+});
+
+analytics.notFollowingBack = notFollowingBack;
+
+
+// =========================
+// FOLLOWERS YOU DON'T FOLLOW
+// =========================
+
+// People who follow you but you don't follow them.
+let notFollowingYou = 0;
+
+followerSet.forEach((username) => {
+
+  if (!followingSet.has(username)) {
+    notFollowingYou++;
+  }
+
+});
+
+analytics.notFollowingYou = notFollowingYou;
 
 
   // =========================

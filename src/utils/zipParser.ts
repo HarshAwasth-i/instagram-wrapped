@@ -42,9 +42,12 @@ export async function parseInstagramZip(file: File) {
       // Followers
       // -------------------------
 
-      if (path.endsWith("followers_1.json")) {
-        instagramData.followers.push(json);
-      }
+     if (
+  path.endsWith("followers.json") ||
+  /followers_\d+\.json$/.test(path)
+) {
+  instagramData.followers.push(json);
+}
 
 
       // -------------------------
