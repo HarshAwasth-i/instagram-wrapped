@@ -53,14 +53,16 @@ export async function parseInstagramZip(file: File) {
       // -------------------------
       // Following
       // -------------------------
-
-      else if (path.endsWith("following.json")) {
-        if (json.relationships_following) {
-          instagramData.following = json.relationships_following;
-        } else {
-          instagramData.following.push(json);
-        }
-      }
+else if (
+  path.endsWith("following.json") ||
+  /following_\d+\.json$/.test(path)
+) {
+  if (json.relationships_following) {
+    instagramData.following = json.relationships_following;
+  } else {
+    instagramData.following.push(json);
+  }
+}
 
 
       // -------------------------
@@ -131,18 +133,19 @@ export async function parseInstagramZip(file: File) {
       // Stories
       // -------------------------
 
-      else if (path.includes("stories")) {
-        instagramData.stories.push(json);
-      }
+// Stories
+else if (
+  path.includes("your_instagram_activity/media/stories")
+) {
+  instagramData.stories.push(json);
+}
 
-
-      // -------------------------
-      // Posts
-      // -------------------------
-
-      else if (path.includes("posts")) {
-        instagramData.posts.push(json);
-      }
+// Posts
+else if (
+  path.includes("your_instagram_activity/media/posts")
+) {
+  instagramData.posts.push(json);
+}
 
 
     } catch (error) {

@@ -12,7 +12,6 @@ export function analyzeInstagramData(data: any) {
     followingCount: 0,
 
     // Connections
-
     notFollowingBack: 0,
     notFollowingYou: 0,
     mutualFollowers: 0,
@@ -31,6 +30,7 @@ export function analyzeInstagramData(data: any) {
     likesPerMonth: Array(12).fill(0),
     likeActivity: Array(24).fill(0),
     topLikedAccounts: [],
+    likedContent: [],
 
     // Messages
     messagesCount: 0,
@@ -67,170 +67,131 @@ export function analyzeInstagramData(data: any) {
     peakStoryMonth: "",
   };
 
+  // =========================
+  // FOLLOWERS & FOLLOWING
+  // =========================
 
-// =========================
-// FOLLOWERS & FOLLOWING
-// =========================
+  // Store usernames in Sets so we can compare
+  // followers and following efficiently.
+  const followerSet = new Set<string>();
+  const followingSet = new Set<string>();
 
-// Store usernames in Sets so we can compare
-// followers and following efficiently.
-const followerSet = new Set<string>();
-const followingSet = new Set<string>();
+  // =========================
+  // FOLLOWERS
+  // =========================
 
+  if (data.followers?.length) {
+    data.followers.forEach((file: any) => {
+      // Some Instagram exports contain
+      // the users directly as an array.
+      if (Array.isArray(file)) {
+        file.forEach((user: any) => {
+          if (user.string_list_data) {
+            user.string_list_data.forEach((item: any) => {
+              if (item.value) {
+                followerSet.add(item.value);
+              }
+            });
+          }
+        });
+      }
 
-// =========================
-// FOLLOWERS
-// =========================
-
-if (data.followers?.length) {
-
-  data.followers.forEach((file: any) => {
-
-    // Some Instagram exports contain
-    // the users directly as an array.
-    if (Array.isArray(file)) {
-
-      file.forEach((user: any) => {
-
-        if (user.string_list_data) {
-
-          user.string_list_data.forEach((item: any) => {
-
+      // Other exports may contain
+      // relationships_followers.
+      else if (file.relationships_followers) {
+        file.relationships_followers.forEach((user: any) => {
+          user.string_list_data?.forEach((item: any) => {
             if (item.value) {
               followerSet.add(item.value);
             }
-
           });
+        });
+      }
 
-        }
-
-      });
-
-    }
-
-    // Other exports may contain
-    // relationships_followers.
-    else if (file.relationships_followers) {
-
-      file.relationships_followers.forEach((user: any) => {
-
-        user.string_list_data?.forEach((item: any) => {
-
+      // Direct string_list_data fallback
+      else if (file.string_list_data) {
+        file.string_list_data.forEach((item: any) => {
           if (item.value) {
             followerSet.add(item.value);
           }
-
         });
+      }
+    });
+  }
 
-      });
+  // =========================
+  // FOLLOWING
+  // =========================
 
+  if (data.following?.length) {
+    data.following.forEach((user: any) => {
+      // Instagram's current export stores username in "title"
+      if (user.title) {
+        followingSet.add(user.title);
+      }
+
+      // Fallback for older Instagram export formats
+      else if (user.string_list_data) {
+        user.string_list_data.forEach((item: any) => {
+          if (item.value) {
+            followingSet.add(item.value);
+          }
+        });
+      }
+    });
+  }
+
+  // =========================
+  // COUNTS
+  // =========================
+
+  analytics.followersCount = followerSet.size;
+  analytics.followingCount = followingSet.size;
+
+  // =========================
+  // MUTUAL FOLLOWERS
+  // =========================
+
+  // People who follow you AND you follow them.
+  let mutualCount = 0;
+
+  followerSet.forEach((username) => {
+    if (followingSet.has(username)) {
+      mutualCount++;
     }
-
-    // Direct string_list_data fallback
-    else if (file.string_list_data) {
-
-      file.string_list_data.forEach((item: any) => {
-
-        if (item.value) {
-          followerSet.add(item.value);
-        }
-
-      });
-
-    }
-
   });
 
-}
+  analytics.mutualFollowers = mutualCount;
 
+  // =========================
+  // NOT FOLLOWING BACK
+  // =========================
 
-// =========================
-// FOLLOWING
-// =========================
+  // People you follow who don't follow you back.
+  let notFollowingBack = 0;
 
-if (data.following?.length) {
-
-  data.following.forEach((user: any) => {
-
-    // Standard Instagram format
-    if (user.string_list_data) {
-
-      user.string_list_data.forEach((item: any) => {
-
-        if (item.value) {
-          followingSet.add(item.value);
-        }
-
-      });
-
+  followingSet.forEach((username) => {
+    if (!followerSet.has(username)) {
+      notFollowingBack++;
     }
-
   });
 
-}
+  analytics.notFollowingBack = notFollowingBack;
 
+  // =========================
+  // FOLLOWERS YOU DON'T FOLLOW
+  // =========================
 
-// =========================
-// COUNTS
-// =========================
+  // People who follow you but you don't follow them.
+  let notFollowingYou = 0;
 
-analytics.followersCount = followerSet.size;
-analytics.followingCount = followingSet.size;
+  followerSet.forEach((username) => {
+    if (!followingSet.has(username)) {
+      notFollowingYou++;
+    }
+  });
 
-
-// =========================
-// MUTUAL FOLLOWERS
-// =========================
-
-// People who follow you AND you follow them.
-let mutualCount = 0;
-
-followerSet.forEach((username) => {
-
-  if (followingSet.has(username)) {
-    mutualCount++;
-  }
-
-});
-
-analytics.mutualFollowers = mutualCount;
-
-
-// =========================
-// NOT FOLLOWING BACK
-// =========================
-
-// People you follow who don't follow you back.
-let notFollowingBack = 0;
-
-followingSet.forEach((username) => {
-
-  if (!followerSet.has(username)) {
-    notFollowingBack++;
-  }
-
-});
-
-analytics.notFollowingBack = notFollowingBack;
-
-
-// =========================
-// FOLLOWERS YOU DON'T FOLLOW
-// =========================
-
-// People who follow you but you don't follow them.
-let notFollowingYou = 0;
-
-followerSet.forEach((username) => {
-
-  if (!followingSet.has(username)) {
-    notFollowingYou++;
-  }
-
-});
-
-analytics.notFollowingYou = notFollowingYou;
-
+  analytics.notFollowingYou = notFollowingYou;
 
   // =========================
   // LIKES
@@ -240,59 +201,155 @@ analytics.notFollowingYou = notFollowingYou;
     let count = 0;
     let monthLikes = Array(12).fill(0);
     let hourLikes = Array(24).fill(0);
+
+    // Used for Top Liked Accounts
     let likedAccounts: any = {};
+
+    // Used for actual liked posts
+    let likedContent: any[] = [];
 
     data.likes.forEach((item: any) => {
       if (Array.isArray(item)) {
         item.forEach((like: any) => {
           count++;
 
-          // Monthly likes
+          // =========================
+          // STORE LIKED POST
+          // =========================
+
+          // Instagram's liked_posts export contains
+          // the actual post URL and caption.
+    // =========================
+// STORE LIKED POST DATA
+// =========================
+
+let caption = "";
+let url = "";
+let timestamp = like.timestamp || null;
+
+// Instagram export may store these
+// inside label_values.
+if (like.label_values?.length) {
+  like.label_values.forEach((label: any) => {
+    const labelName = (
+      label.label ||
+      label.name ||
+      ""
+    ).toLowerCase();
+
+    const value = label.value || "";
+
+    if (labelName === "caption") {
+      caption = value;
+    }
+
+    if (labelName === "url") {
+      url = value;
+    }
+
+    // In case timestamp is also stored here
+    if (labelName === "timestamp" && !timestamp) {
+      timestamp = Number(value) || null;
+    }
+  });
+}
+
+// Fallback for other Instagram export formats
+if (!caption) {
+  caption =
+    like.Caption ||
+    like.caption ||
+    "";
+}
+
+if (!url) {
+  url =
+    like.URL ||
+    like.url ||
+    "";
+}
+
+// Store the real liked post
+likedContent.push({
+  caption: cleanText(caption || "Liked post"),
+  url,
+  timestamp,
+});
+
+          // =========================
+          // MONTHLY LIKES
+          // =========================
+
           if (like.timestamp) {
             const date = new Date(like.timestamp * 1000);
+
             const month = date.getMonth();
             monthLikes[month]++;
 
-            // Hourly likes
+            // =========================
+            // HOURLY LIKES
+            // =========================
+
             const hour = date.getHours();
             hourLikes[hour]++;
           }
 
-          // Account name
+          // =========================
+          // ACCOUNT NAME
+          // =========================
+
           let username = "";
 
           // New Instagram likes format
           if (like.label_values?.length) {
             like.label_values.forEach((label: any) => {
-              let value = label.value || label.title || "";
-              if (value.includes("instagram.com")) {
-                let parts = value.split("/");
-                let idx = parts.indexOf("instagram.com");
-                if (idx !== -1 && parts[idx + 1]) {
-                  username = parts[idx + 1];
+              const value = label.value || "";
+
+              // Only accept an actual Instagram profile URL
+              if (value.includes("instagram.com/u/")) {
+                const parts = value.split("/u/");
+
+                if (parts[1]) {
+                  username = parts[1].split("/")[0];
                 }
-              } else if (value && !username) {
-                username = value;
               }
             });
           }
 
-          // Fallback for old Instagram format
+          // Fallback for older Instagram format
           if (!username) {
             username =
-              like.title || like.string_list_data?.[0]?.title || "";
+              like.title ||
+              like.string_list_data?.[0]?.title ||
+              "";
           }
 
-          if (username) {
-            likedAccounts[username] = (likedAccounts[username] || 0) + 1;
+          // Only store a genuine-looking username
+          if (
+            username &&
+            !username.includes("instagram.com") &&
+            !username.includes("http") &&
+            !username.includes(" ") &&
+            username.length > 2
+          ) {
+            likedAccounts[username] =
+              (likedAccounts[username] || 0) + 1;
           }
         });
       }
     });
 
+    // =========================
+    // LIKE ANALYTICS
+    // =========================
+
     analytics.likesGiven = count;
     analytics.likesPerMonth = monthLikes;
     analytics.likeActivity = hourLikes;
+
+    // =========================
+    // TOP LIKED ACCOUNTS
+    // =========================
 
     analytics.topLikedAccounts = Object.entries(likedAccounts)
       .sort((a: any, b: any) => b[1] - a[1])
@@ -308,8 +365,19 @@ analytics.notFollowingYou = notFollowingYou;
           !item.username.includes("💖")
       )
       .slice(0, 5);
-  }
 
+    // =========================
+    // LIKED CONTENT
+    // =========================
+
+    analytics.likedContent = likedContent
+      .sort(
+        (a, b) =>
+          (b.timestamp || 0) -
+          (a.timestamp || 0)
+      )
+      .slice(0, 5);
+  }
 
   // =========================
   // COMMENTS
@@ -317,14 +385,15 @@ analytics.notFollowingYou = notFollowingYou;
 
   if (data.comments?.length) {
     let count = 0;
+
     data.comments.forEach((item: any) => {
       if (Array.isArray(item)) {
         count += item.length;
       }
     });
+
     analytics.commentsCount = count;
   }
-
 
   // =========================
   // MESSAGES
@@ -336,9 +405,11 @@ analytics.notFollowingYou = notFollowingYou;
   // The owner is the person who appears most as sender_name across all chats.
   // We do a pre-pass to count occurrences.
   let senderTotals: any = {};
+
   if (data.messages?.length) {
     data.messages.forEach((chat: any) => {
       if (!chat.messages) return;
+
       chat.messages.forEach((msg: any) => {
         if (msg.sender_name) {
           senderTotals[msg.sender_name] =
@@ -348,7 +419,7 @@ analytics.notFollowingYou = notFollowingYou;
     });
   }
 
-  // The owner is the sender with the highest count (they DM themselves in every thread)
+  // The owner is the sender with the highest count.
   const ownerName: string =
     Object.entries(senderTotals).sort(
       (a: any, b: any) => b[1] - a[1]
@@ -365,7 +436,10 @@ analytics.notFollowingYou = notFollowingYou;
 
         // Hour activity
         if (msg.timestamp_ms) {
-          const hour = new Date(msg.timestamp_ms).getHours();
+          const hour = new Date(
+            msg.timestamp_ms
+          ).getHours();
+
           analytics.hourActivity[hour]++;
         }
 
@@ -374,6 +448,7 @@ analytics.notFollowingYou = notFollowingYou;
           analytics.sentMessages++;
         } else {
           analytics.receivedMessages++;
+
           friendMap[msg.sender_name] =
             (friendMap[msg.sender_name] || 0) + 1;
         }
@@ -381,23 +456,34 @@ analytics.notFollowingYou = notFollowingYou;
         // First / last message
         if (msg.timestamp_ms) {
           const date = new Date(msg.timestamp_ms);
+
           const messageData = {
-            text: cleanText(msg.content || "Media message"),
+            text: cleanText(
+              msg.content || "Media message"
+            ),
             date,
-            friend: cleanText(msg.sender_name || "Unknown"),
+            friend: cleanText(
+              msg.sender_name || "Unknown"
+            ),
           };
 
-          if (!analytics.firstMessage || date < analytics.firstMessage.date) {
+          if (
+            !analytics.firstMessage ||
+            date < analytics.firstMessage.date
+          ) {
             analytics.firstMessage = messageData;
           }
-          if (!analytics.lastMessage || date > analytics.lastMessage.date) {
+
+          if (
+            !analytics.lastMessage ||
+            date > analytics.lastMessage.date
+          ) {
             analytics.lastMessage = messageData;
           }
         }
       });
     });
   }
-
 
   // =========================
   // TOP FRIEND
@@ -411,33 +497,50 @@ analytics.notFollowingYou = notFollowingYou;
       count,
     }));
 
-  analytics.topFriend = analytics.topFriends[0]?.name || "";
+  analytics.topFriend =
+    analytics.topFriends[0]?.name || "";
 
-  console.log("TOP FRIENDS:", analytics.topFriends);
-
+  console.log(
+    "TOP FRIENDS:",
+    analytics.topFriends
+  );
 
   // =========================
   // CONTENT ANALYTICS
   // =========================
 
   const monthNames = [
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   let postMonths = Array(12).fill(0);
   let storyMonths = Array(12).fill(0);
   let reelMonths = Array(12).fill(0);
 
-
+  // =========================
   // POSTS
+  // =========================
+
   if (data.posts?.length) {
     data.posts.forEach((item: any) => {
       if (Array.isArray(item)) {
         item.forEach((post: any) => {
           if (post.timestamp) {
-            const month = new Date(post.timestamp * 1000).getMonth();
+            const month = new Date(
+              post.timestamp * 1000
+            ).getMonth();
+
             postMonths[month]++;
             analytics.postsCount++;
           }
@@ -446,14 +549,24 @@ analytics.notFollowingYou = notFollowingYou;
     });
   }
 
-
+  // =========================
   // STORIES
+  // =========================
+
   if (data.stories?.length) {
-    data.stories.forEach((item: any) => {
-      if (Array.isArray(item)) {
-        item.forEach((story: any) => {
-          if (story.timestamp) {
-            const month = new Date(story.timestamp * 1000).getMonth();
+    data.stories.forEach((file: any) => {
+      // Instagram export format:
+      // { ig_stories: [...] }
+      if (
+        file.ig_stories &&
+        Array.isArray(file.ig_stories)
+      ) {
+        file.ig_stories.forEach((story: any) => {
+          if (story.creation_timestamp) {
+            const month = new Date(
+              story.creation_timestamp * 1000
+            ).getMonth();
+
             storyMonths[month]++;
             analytics.storiesCount++;
           }
@@ -462,22 +575,23 @@ analytics.notFollowingYou = notFollowingYou;
     });
   }
 
-
   analytics.contentTimeline = {
     posts: postMonths,
     stories: storyMonths,
     reels: reelMonths,
   };
 
-
   // Most active posting month
   const maxPost = Math.max(...postMonths);
-  analytics.mostActiveMonth = monthNames[postMonths.indexOf(maxPost)] || "—";
+
+  analytics.mostActiveMonth =
+    monthNames[postMonths.indexOf(maxPost)] || "—";
 
   // Peak story month
   const maxStory = Math.max(...storyMonths);
-  analytics.peakStoryMonth = monthNames[storyMonths.indexOf(maxStory)] || "—";
 
+  analytics.peakStoryMonth =
+    monthNames[storyMonths.indexOf(maxStory)] || "—";
 
   // =========================
   // SEARCH ANALYTICS
@@ -491,36 +605,49 @@ analytics.notFollowingYou = notFollowingYou;
       if (Array.isArray(file)) {
         file.forEach((item: any) => {
           if (item.string_map_data) {
-            const value = Object.values(item.string_map_data)[0] as any;
+            const value = Object.values(
+              item.string_map_data
+            )[0] as any;
+
             if (value?.value) {
-              searchMap[value.value] = (searchMap[value.value] || 0) + 1;
+              searchMap[value.value] =
+                (searchMap[value.value] || 0) + 1;
             }
           }
         });
       }
+
       // Format B: file has searches_user array
       else if (file.searches_user) {
         file.searches_user.forEach((item: any) => {
           const username = item.title;
+
           if (username) {
-            searchMap[username] = (searchMap[username] || 0) + 1;
+            searchMap[username] =
+              (searchMap[username] || 0) + 1;
           }
         });
       }
+
       // Format C: item itself has string_map_data
       else if (file.string_map_data) {
-        const value = Object.values(file.string_map_data)[0] as any;
+        const value = Object.values(
+          file.string_map_data
+        )[0] as any;
+
         if (value?.value) {
-          searchMap[value.value] = (searchMap[value.value] || 0) + 1;
+          searchMap[value.value] =
+            (searchMap[value.value] || 0) + 1;
         }
       }
     });
   }
 
-  analytics.totalSearches = Object.values(searchMap).reduce(
-    (sum: any, val: any) => sum + val,
-    0
-  ) as number;
+  analytics.totalSearches =
+    Object.values(searchMap).reduce(
+      (sum: any, val: any) => sum + val,
+      0
+    ) as number;
 
   analytics.topSearches = Object.entries(searchMap)
     .sort((a: any, b: any) => b[1] - a[1])
@@ -529,7 +656,6 @@ analytics.notFollowingYou = notFollowingYou;
       username: cleanText(username),
       count,
     }));
-
 
   // =========================
   // LOGIN ACTIVITY
@@ -556,7 +682,6 @@ analytics.notFollowingYou = notFollowingYou;
     analytics.mostUsedDevice = "";
   }
 
-
   // =========================
   // PERSONALITY
   // =========================
@@ -566,35 +691,42 @@ analytics.notFollowingYou = notFollowingYou;
 
   if (analytics.messagesCount > 50000) {
     personality.push("Chat Machine");
+
     cards.push({
       title: "Social Builder",
       emoji: "🧱",
-      description: "Maintains many active conversations",
+      description:
+        "Maintains many active conversations",
       score: 5,
     });
   } else if (analytics.messagesCount > 10000) {
     personality.push("Social Butterfly");
+
     cards.push({
       title: "Social Butterfly",
       emoji: "💬",
-      description: "Always keeping conversations alive",
+      description:
+        "Always keeping conversations alive",
       score: 4,
     });
   }
 
   if (analytics.likesGiven > 20000) {
     personality.push("Like Machine");
+
     cards.push({
       title: "Like Machine",
       emoji: "❤️",
-      description: "Shows love across Instagram",
+      description:
+        "Shows love across Instagram",
       score: 5,
     });
   } else if (analytics.likesGiven > 5000) {
     cards.push({
       title: "Supportive Friend",
       emoji: "💖",
-      description: "Always engaging with others",
+      description:
+        "Always engaging with others",
       score: 3,
     });
   }
@@ -603,7 +735,8 @@ analytics.notFollowingYou = notFollowingYou;
     cards.push({
       title: "Silent Observer",
       emoji: "👀",
-      description: "Likes more than posts",
+      description:
+        "Likes more than posts",
       score: 5,
     });
   }
@@ -618,7 +751,8 @@ analytics.notFollowingYou = notFollowingYou;
     personality.push("🌱 Quiet Observer");
   }
 
-  analytics.personality = personality.join(" • ");
+  analytics.personality =
+    personality.join(" • ");
 
   return analytics;
 }
