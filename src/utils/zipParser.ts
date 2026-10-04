@@ -53,16 +53,18 @@ export async function parseInstagramZip(file: File) {
       // -------------------------
       // Following
       // -------------------------
-else if (
-  path.endsWith("following.json") ||
-  /following_\d+\.json$/.test(path)
-) {
-  if (json.relationships_following) {
-    instagramData.following = json.relationships_following;
-  } else {
-    instagramData.following.push(json);
-  }
-}
+      else if (
+        path.endsWith("following.json") ||
+        /following_\d+\.json$/.test(path)
+      ) {
+        if (json.relationships_following && Array.isArray(json.relationships_following)) {
+          instagramData.following.push(...json.relationships_following);
+        } else if (Array.isArray(json)) {
+          instagramData.following.push(...json);
+        } else {
+          instagramData.following.push(json);
+        }
+      }
 
 
       // -------------------------
@@ -75,7 +77,6 @@ else if (
         path.includes("word_or_phrase_searches") ||
         path.includes("account_searches")
       ) {
-        console.log("SEARCH FILE FOUND:", path);
         instagramData.searches.push(json);
       }
 
@@ -89,7 +90,6 @@ else if (
         path.includes("login_and_account_creation") ||
         path.includes("login_activity")
       ) {
-        console.log("LOGIN FILE FOUND:", path);
         instagramData.loginActivity.push(json);
       }
 
@@ -133,23 +133,39 @@ else if (
       // Stories
       // -------------------------
 
-// Stories
-else if (
-  path.includes("your_instagram_activity/media/stories")
-) {
-  instagramData.stories.push(json);
-}
+      else if (
+        path.includes("your_instagram_activity/media/stories") ||
+        path.includes("media/stories")
+      ) {
+        instagramData.stories.push(json);
+      }
 
-// Posts
-else if (
-  path.includes("your_instagram_activity/media/posts")
-) {
-  instagramData.posts.push(json);
-}
+      // -------------------------
+      // Posts
+      // -------------------------
+
+      else if (
+        path.includes("your_instagram_activity/media/posts") ||
+        path.includes("media/posts")
+      ) {
+        instagramData.posts.push(json);
+      }
+
+      // -------------------------
+      // Reels / Clips
+      // -------------------------
+
+      else if (
+        path.includes("your_instagram_activity/media/reels") ||
+        path.includes("media/reels") ||
+        path.includes("clips.json")
+      ) {
+        instagramData.reels.push(json);
+      }
 
 
-    } catch (error) {
-      
+    } catch {
+      // Skip invalid single file chunk
     }
 
   }

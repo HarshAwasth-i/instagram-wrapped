@@ -143,20 +143,26 @@ function ChestUpload() {
       }}
 
       className="
-        w-[420px]
-        h-[420px]
+        w-full
+        max-w-[420px]
+        aspect-square
         border
-        border-white/20
-        rounded-2xl
-        bg-[#181818]/70
+        border-white/15
+        rounded-3xl
+        bg-white/[0.03]
+        backdrop-blur-xl
         shadow-2xl
         flex
         flex-col
         items-center
         justify-center
         cursor-pointer
-        hover:bg-white/10
-        transition
+        hover:border-lime-300/40
+        hover:bg-white/[0.06]
+        hover:shadow-[0_0_35px_rgba(190,242,100,0.12)]
+        transition-all
+        duration-300
+        p-6
       "
     >
 

@@ -19,29 +19,34 @@ const [index,setIndex]=useState(0);
 const stories=[
 
 
-<IntroStory/>,
+<IntroStory key="intro"/>,
 
 <FollowersStory
+key="followers"
 count={analytics.followersCount}
 />,
 
 
 <LikesStory
+key="likes"
 count={analytics.likesGiven}
 />,
 
 
 <MessagesStory
+key="messages"
 count={analytics.messagesCount}
 />,
 
 
 <FriendStory
+key="friend"
 name={analytics.topFriend}
 />,
 
 
 <PersonalityStory
+key="personality"
 personality={analytics.personality}
 />
 

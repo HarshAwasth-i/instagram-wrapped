@@ -8,16 +8,13 @@ import {
   useNavigate
 } from "react-router-dom";
 
-
 import {
   InstagramContext
 } from "../context/InstagramContext";
 
-
 import {
   analyzeInstagramData
 } from "../utils/dataAnalyzer";
-
 
 import CategoryTabs
   from "../components/dashboard/CategoryTabs";
@@ -49,36 +46,33 @@ import TopFriends
 import WrappedStories
   from "../components/wrapped/WrappedStories";
 
+import Background
+  from "../components/layout/Background";
+
+import {
+  demoAnalytics
+} from "../utils/demoData";
+
 
 function Dashboard() {
 
-
   const {
-
     analytics,
-
     setAnalytics,
-
     instagramData,
-
     selectedYear,
-
     setSelectedYear
-
   } = useContext(
     InstagramContext
   );
 
-
   const navigate =
     useNavigate();
-
 
   const [
     showWrapped,
     setShowWrapped
   ] = useState(false);
-
 
   const [
     activeTab,
@@ -93,9 +87,7 @@ function Dashboard() {
   const years =
     new Set<number>();
 
-
   if (instagramData) {
-
 
     // -------------------------
     // LIKES
@@ -108,7 +100,6 @@ function Dashboard() {
           return;
         }
 
-
         file.forEach(
           (like: any) => {
 
@@ -116,12 +107,10 @@ function Dashboard() {
               return;
             }
 
-
             const year =
               new Date(
                 like.timestamp * 1000
               ).getFullYear();
-
 
             years.add(year);
 
@@ -143,7 +132,6 @@ function Dashboard() {
           return;
         }
 
-
         chat.messages.forEach(
           (message: any) => {
 
@@ -151,12 +139,10 @@ function Dashboard() {
               return;
             }
 
-
             const year =
               new Date(
                 message.timestamp_ms
               ).getFullYear();
-
 
             years.add(year);
 
@@ -178,7 +164,6 @@ function Dashboard() {
           return;
         }
 
-
         file.forEach(
           (post: any) => {
 
@@ -186,12 +171,10 @@ function Dashboard() {
               return;
             }
 
-
             const year =
               new Date(
                 post.timestamp * 1000
               ).getFullYear();
-
 
             years.add(year);
 
@@ -218,7 +201,6 @@ function Dashboard() {
           return;
         }
 
-
         file.ig_stories.forEach(
           (story: any) => {
 
@@ -228,13 +210,11 @@ function Dashboard() {
               return;
             }
 
-
             const year =
               new Date(
                 story.creation_timestamp *
                   1000
               ).getFullYear();
-
 
             years.add(year);
 
@@ -269,7 +249,6 @@ function Dashboard() {
       return;
     }
 
-
     // No saved year
     if (
       selectedYear === null
@@ -280,9 +259,7 @@ function Dashboard() {
       );
 
       return;
-
     }
-
 
     // Saved year no longer exists
     if (
@@ -313,18 +290,15 @@ function Dashboard() {
 
     setSelectedYear(year);
 
-
     if (!instagramData) {
       return;
     }
-
 
     const yearAnalytics =
       analyzeInstagramData(
         instagramData,
         year
       );
-
 
     setAnalytics(
       yearAnalytics
@@ -367,10 +341,8 @@ function Dashboard() {
       }
 
     } catch {
-
       // User cancelled share.
       // No action needed.
-
     }
 
   }
@@ -383,27 +355,20 @@ function Dashboard() {
   if (!analytics) {
 
     return (
-
-      <div
-        className="
-          min-h-screen
-          bg-black
-          text-white
-          flex
-          items-center
-          justify-center
-        "
-      >
+      <Background className="flex items-center justify-center min-h-screen px-4">
 
         <div
           className="
             text-center
-            bg-white/5
+            bg-white/[0.03]
+            backdrop-blur-xl
             border
             border-white/10
             rounded-3xl
-            p-16
+            p-10
+            md:p-14
             max-w-lg
+            shadow-2xl
           "
         >
 
@@ -416,55 +381,86 @@ function Dashboard() {
             📂
           </div>
 
-
           <h1
             className="
               text-3xl
-              font-bold
+              md:text-4xl
+              font-black
               text-white
-              mb-4
+              mb-3
             "
           >
             No data yet
           </h1>
 
-
           <p
             className="
               text-gray-400
-              text-lg
-              mb-10
+              text-base
+              md:text-lg
+              mb-8
             "
           >
-            Upload your Instagram
-            data export to see your
-            year in review.
+            Upload your Instagram data export to see your personalized year in review, or preview with sample data right now.
           </p>
 
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
 
-          <button
-            onClick={() =>
-              navigate("/")
-            }
-            className="
-              bg-lime-300
-              text-black
-              font-bold
-              px-10
-              py-4
-              rounded-xl
-              hover:bg-lime-200
-              transition
-              text-lg
-            "
-          >
-            ← Go Home & Upload
-          </button>
+            <button
+              onClick={() =>
+                navigate("/")
+              }
+              className="
+                px-6
+                py-3.5
+                rounded-xl
+                bg-white/[0.05]
+                border
+                border-white/15
+                text-white
+                font-bold
+                text-sm
+                backdrop-blur-md
+                hover:bg-white/[0.1]
+                hover:border-white/30
+                transition-all
+                cursor-pointer
+              "
+            >
+              ← Go Home & Upload
+            </button>
+
+            <button
+              onClick={() => {
+                setAnalytics(demoAnalytics);
+                setSelectedYear(2026);
+              }}
+              className="
+                px-6
+                py-3.5
+                rounded-xl
+                bg-lime-400/18
+                border
+                border-lime-400/50
+                text-lime-300
+                font-bold
+                text-sm
+                backdrop-blur-md
+                hover:bg-lime-400/28
+                hover:border-lime-300
+                hover:shadow-[0_0_25px_rgba(190,242,100,0.22)]
+                transition-all
+                cursor-pointer
+              "
+            >
+              ⚡ Try Sample Demo
+            </button>
+
+          </div>
 
         </div>
 
-      </div>
-
+      </Background>
     );
 
   }
@@ -475,16 +471,7 @@ function Dashboard() {
   // =========================
 
   return (
-
-    <div
-      className="
-        min-h-screen
-        bg-black
-        text-white
-        pb-20
-      "
-    >
-
+    <Background className="min-h-screen">
 
       {/* =========================
           TOP HEADER
@@ -492,59 +479,113 @@ function Dashboard() {
 
       <header
         className="
-          w-full
-          px-6
+          border-b
+          border-white/10
+          px-5
           md:px-8
-          py-6
+          py-3
           flex
-          flex-col
-          md:flex-row
-          md:items-start
-          md:justify-between
-          gap-6
+          items-center
+          justify-between
+          gap-4
         "
       >
-
 
         {/* LOGO */}
 
         <div
+          onClick={() => navigate("/")}
           className="
-            text-lime-300
-            text-3xl
-            md:text-4xl
-            font-black
-            leading-[0.9]
-            tracking-tight
+            flex
+            items-center
+            gap-3
+            cursor-pointer
+            group
           "
         >
 
-          <div>
-            INSTAGRAM
+          <div
+            className="
+              w-8
+              h-8
+              md:w-9
+              md:h-9
+              rounded-lg
+              bg-lime-400/20
+              border
+              border-lime-400/50
+              text-lime-300
+              flex
+              items-center
+              justify-center
+              font-black
+              text-lg
+              backdrop-blur-md
+              group-hover:shadow-[0_0_15px_rgba(190,242,100,0.3)]
+              transition-all
+            "
+          >
+            I
           </div>
 
-          <div>
-            WRAPPED
+          <div
+            className="
+              leading-none
+            "
+          >
+
+            <div
+              className="
+                text-sm
+                md:text-base
+                font-black
+                tracking-wider
+              "
+            >
+              INSTAGRAM
+            </div>
+
+            <div
+              className="
+                text-[9px]
+                md:text-[10px]
+                text-gray-500
+                tracking-[0.3em]
+                mt-1
+              "
+            >
+              WRAPPED
+            </div>
+
           </div>
 
         </div>
 
 
-        {/* =========================
-            YEARS + SHARE
-            ========================= */}
+        {/* YEARS + UPLOAD NEW + SHARE */}
 
         <div
           className="
             flex
-            flex-wrap
             items-center
-            justify-end
-            gap-2
-            md:max-w-[70%]
+            gap-1.5
+            md:gap-2
+            overflow-x-auto
           "
         >
 
+          <span
+            className="
+              hidden
+              md:block
+              text-[10px]
+              text-gray-500
+              tracking-widest
+              mr-1
+            "
+          >
+            YEAR
+          </span>
 
           {availableYears.map(
             (year) => (
@@ -557,62 +598,97 @@ function Dashboard() {
                   )
                 }
                 className={`
-                  min-w-[64px]
-                  px-4
-                  py-3
-                  rounded-md
+                  px-3
+                  md:px-4
+                  py-2
+                  rounded-lg
                   font-bold
-                  text-sm
+                  text-xs
+                  md:text-sm
                   border
+                  backdrop-blur-md
                   transition-all
                   duration-200
+                  whitespace-nowrap
+                  cursor-pointer
 
                   ${
                     selectedYear === year
                       ? `
-                        bg-lime-300
-                        text-black
-                        border-lime-300
-                        shadow-lg
+                        bg-lime-400/20
+                        text-lime-300
+                        border-lime-400/60
+                        shadow-[0_0_20px_rgba(190,242,100,0.22)]
                       `
                       : `
-                        bg-white/5
-                        text-gray-300
-                        border-white/15
-                        hover:bg-white/10
-                        hover:border-white/30
+                        bg-white/[0.03]
+                        text-gray-400
+                        border-white/10
+                        hover:bg-white/[0.08]
+                        hover:border-white/20
+                        hover:text-white
                       `
                   }
                 `}
               >
-
                 {year}
-
               </button>
 
             )
           )}
 
-
-          {/* SHARE */}
+          <button
+            onClick={() => navigate("/")}
+            className="
+              ml-1
+              px-3
+              md:px-4
+              py-2
+              rounded-lg
+              border
+              border-white/10
+              bg-white/[0.03]
+              text-gray-300
+              text-xs
+              md:text-sm
+              font-bold
+              backdrop-blur-md
+              hover:bg-white/[0.08]
+              hover:text-white
+              hover:border-white/20
+              transition-all
+              whitespace-nowrap
+              cursor-pointer
+            "
+          >
+            ← Upload New
+          </button>
 
           <button
             onClick={handleShare}
             className="
-              px-5
-              py-3
-              rounded-md
+              px-3
+              md:px-4
+              py-2
+              rounded-lg
               border
-              border-white/20
-              text-white
-              text-sm
+              border-white/15
+              bg-white/[0.05]
+              text-gray-200
+              text-xs
+              md:text-sm
               font-bold
-              hover:bg-white/10
-              transition
+              backdrop-blur-md
+              hover:bg-white/[0.1]
+              hover:text-white
+              hover:border-white/30
+              transition-all
               whitespace-nowrap
+              cursor-pointer
+              active:scale-95
             "
           >
-            ↑ SHARE
+            ↑ Share
           </button>
 
         </div>
@@ -621,189 +697,295 @@ function Dashboard() {
 
 
       {/* =========================
-          WRAPPED HERO
+          HERO
           ========================= */}
 
-      <div
+      <section
         className="
+          relative
+          overflow-hidden
+          px-5
+          pt-8
+          md:pt-10
+          pb-5
+          md:pb-6
           text-center
-          px-6
-          mt-12
-          mb-10
         "
       >
 
-        <p
-          className="
-            text-lime-300
-            uppercase
-            tracking-[0.3em]
-            text-sm
-            font-bold
-            mb-4
-          "
-        >
-          YOUR INSTAGRAM
-        </p>
-
-
-        <h1
-          className="
-            text-6xl
-            md:text-8xl
-            font-black
-            tracking-tight
-          "
-        >
-          WRAPPED
-        </h1>
-
+        {/* SUBTLE GLOW */}
 
         <div
           className="
-            text-4xl
-            md:text-5xl
-            font-bold
-            text-[#d8cfb5]
-            mt-3
+            absolute
+            top-0
+            left-1/2
+            -translate-x-1/2
+            w-[500px]
+            h-[250px]
+            bg-lime-300/[0.04]
+            blur-[100px]
+            pointer-events-none
+          "
+        />
+
+        <div
+          className="
+            relative
           "
         >
-          {selectedYear ||
-            "YOUR YEAR"}
+
+          <p
+            className="
+              text-lime-300
+              uppercase
+              tracking-[0.3em]
+              text-[11px]
+              md:text-xs
+              font-black
+              mb-3
+            "
+          >
+            YOUR INSTAGRAM
+          </p>
+
+          <h1
+            className="
+              text-5xl
+              md:text-6xl
+              lg:text-7xl
+              font-black
+              tracking-tight
+              leading-none
+            "
+          >
+            WRAPPED
+          </h1>
+
+          <div
+            className="
+              text-3xl
+              md:text-4xl
+              font-bold
+              text-[#d8cfb5]
+              mt-2
+            "
+          >
+            {selectedYear ||
+              "YOUR YEAR"}
+          </div>
+
+          <p
+            className="
+              text-gray-500
+              mt-2
+              text-sm
+              md:text-base
+            "
+          >
+            A year of messages,
+            likes, stories and
+            everything in between.
+          </p>
+
+          <button
+            onClick={() =>
+              setShowWrapped(true)
+            }
+            className="
+              mt-5
+              px-8
+              py-3.5
+              rounded-full
+              bg-lime-400/18
+              border
+              border-lime-400/50
+              text-lime-300
+              font-black
+              text-sm
+              md:text-base
+              backdrop-blur-xl
+              hover:scale-105
+              hover:bg-lime-400/28
+              hover:border-lime-300
+              hover:shadow-[0_0_35px_rgba(190,242,100,0.32)]
+              active:scale-95
+              transition-all
+              duration-300
+              cursor-pointer
+            "
+          >
+            ✨ View Your Wrapped
+          </button>
+
         </div>
 
-
-        <p
-          className="
-            text-gray-400
-            mt-5
-            text-lg
-          "
-        >
-          A year of messages,
-          likes, stories & chaos.
-        </p>
-
-
-        <button
-          onClick={() =>
-            setShowWrapped(true)
-          }
-          className="
-            mt-8
-            px-8
-            py-4
-            rounded-full
-            bg-lime-300
-            text-black
-            font-black
-            text-lg
-            hover:scale-105
-            transition
-            shadow-lg
-          "
-        >
-          ✨ View Your Wrapped
-        </button>
-
-      </div>
+      </section>
 
 
       {/* =========================
-          CATEGORY TABS
+          MAIN DASHBOARD
           ========================= */}
 
-      <CategoryTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
-
-
-      {/* =========================
-          CONTENT
-          ========================= */}
-
-      <div
+      <main
         className="
-          px-6
-          md:px-10
-          mt-10
-          pb-20
+          w-full
+          max-w-[1500px]
+          mx-auto
+          px-4
+          md:px-6
+          pb-16
         "
       >
 
+        {/* =========================
+            CATEGORY TABS
+            ========================= */}
 
-        {/* MESSAGES */}
+        <div
+          className="
+            rounded-xl
+            border
+            border-white/10
+            bg-white/[0.02]
+            p-1
+            md:p-1.5
+          "
+        >
 
-        {activeTab ===
-          "Messages" && (
+          <CategoryTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
 
-          <>
-
-            <h2
-              className="
-                text-4xl
-                font-bold
-                text-center
-              "
-            >
-              💬 Messages
-            </h2>
-
-
-            <MessageStats />
-
-            <MessageHighlights />
-
-            <MessageActivity />
-
-            <TopFriends />
-
-          </>
-
-        )}
+        </div>
 
 
-        {/* LIKES */}
+        {/* =========================
+            CONTENT
+            ========================= */}
 
-        {activeTab ===
-          "Likes" && (
+        <div
+          className="
+            mt-4
+            md:mt-5
+          "
+        >
 
-          <LikesSection />
+          {/* =========================
+              MESSAGES
+              ========================= */}
 
-        )}
+          {activeTab ===
+            "Messages" && (
+            <>
+
+              <div
+                className="
+                  text-center
+                  mb-6
+                  md:mb-8
+                "
+              >
+
+                <p
+                  className="
+                    text-[10px]
+                    md:text-xs
+                    text-gray-600
+                    uppercase
+                    tracking-[0.3em]
+                    mb-2
+                  "
+                >
+                  YOUR SOCIAL LIFE
+                </p>
+
+                <h2
+                  className="
+                    text-3xl
+                    md:text-4xl
+                    font-black
+                  "
+                >
+                  💬 Messages
+                </h2>
+
+                <p
+                  className="
+                    text-gray-500
+                    text-sm
+                    mt-2
+                  "
+                >
+                  Your {selectedYear} in DMs
+                </p>
+
+              </div>
+
+              <div
+                className="
+                  space-y-6
+                  md:space-y-8
+                "
+              >
+
+                <MessageStats />
+
+                <MessageHighlights />
+
+                <MessageActivity />
+
+                <TopFriends />
+
+              </div>
+
+            </>
+          )}
 
 
-        {/* CONTENT */}
+          {/* =========================
+              LIKES
+              ========================= */}
 
-        {activeTab ===
-          "Content" && (
-
-          <ContentSection />
-
-        )}
-
-
-        {/* CONNECTIONS */}
-
-        {activeTab ===
-          "Connections" && (
-
-          <ConnectionsSection />
-
-        )}
+          {activeTab ===
+            "Likes" && (
+            <LikesSection />
+          )}
 
 
-        {/* PERSONALITY */}
+          {/* =========================
+              CONTENT
+              ========================= */}
 
-        {activeTab ===
-          "Personality" && (
+          {activeTab ===
+            "Content" && (
+            <ContentSection />
+          )}
 
-          <PersonalitySection />
 
-        )}
+          {/* =========================
+              CONNECTIONS
+              ========================= */}
 
-      </div>
+          {activeTab ===
+            "Connections" && (
+            <ConnectionsSection />
+          )}
+
+
+          {/* =========================
+              PERSONALITY
+              ========================= */}
+
+          {activeTab ===
+            "Personality" && (
+            <PersonalitySection />
+          )}
+
+        </div>
+
+      </main>
 
 
       {/* =========================
@@ -811,20 +993,15 @@ function Dashboard() {
           ========================= */}
 
       {showWrapped && (
-
         <WrappedStories
           onClose={() =>
             setShowWrapped(false)
           }
         />
-
       )}
 
-    </div>
-
+    </Background>
   );
-
 }
-
 
 export default Dashboard;

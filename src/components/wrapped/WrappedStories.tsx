@@ -40,189 +40,332 @@ function WrappedStories({
   ] = useState(false);
 
 
-  // =========================
-  // STORY DURATION
-  // =========================
-
   const STORY_DURATION = 5000;
 
+  const a = analytics || {
+    messagesCount: 0,
+    likesGiven: 0,
+    sentMessages: 0,
+    postsCount: 0,
+    storiesCount: 0,
+    reelsCount: 0,
+    followersCount: 0,
+    topFriend: "",
+    topFriends: [],
+    mostActiveMonth: "—",
+    hourActivity: [],
+    personality: "Quiet Observer"
+  };
 
-  if (!analytics) {
-    return null;
-  }
+  // =========================
+  // PERSONALITY
+  // =========================
+
+  const personality =
+    a.messagesCount > 10000
+      ? "Social Builder"
+      : a.likesGiven > 20000
+      ? "Like Machine"
+      : a.likesGiven >
+        a.sentMessages
+      ? "Silent Observer"
+      : a.postsCount < 5
+      ? "Ghost Poster"
+      : a.topFriend
+      ? "Loyal Friend"
+      : "Quiet Observer";
+
+
+  const personalityEmoji =
+    personality === "Social Builder"
+      ? "🧱"
+      : personality === "Like Machine"
+      ? "❤️"
+      : personality === "Silent Observer"
+      ? "👀"
+      : personality === "Ghost Poster"
+      ? "👻"
+      : personality === "Loyal Friend"
+      ? "💕"
+      : "✨";
 
 
   // =========================
-  // WRAPPED SLIDES
+  // CONTENT TOTAL
+  // =========================
+
+  const totalContent =
+    a.postsCount +
+    a.storiesCount +
+    a.reelsCount;
+
+
+  // =========================
+  // SLIDES
   // =========================
 
   const slides = [
 
+    // =========================
+    // INTRO
+    // =========================
+
     {
+      type: "intro",
+
       emoji: "📸",
-      eyebrow: "YOUR INSTAGRAM",
-      title: "WRAPPED",
+
+      eyebrow:
+        "YOUR INSTAGRAM",
+
+      title:
+        "WRAPPED",
+
       value:
         selectedYear || "YEAR",
+
       description:
         "A look back at your Instagram world.",
+
       accent:
         "text-lime-300"
     },
 
 
+    // =========================
+    // MESSAGES
+    // =========================
+
     {
+      type: "messages",
+
       emoji: "💬",
+
       eyebrow:
         "YOUR YEAR IN MESSAGES",
+
       title:
         "You had conversations.",
+
       value:
-        analytics.messagesCount.toLocaleString(),
+        a.messagesCount.toLocaleString(),
+
       suffix:
         "messages",
+
       description:
         "Every message helped tell the story of your year.",
+
       accent:
         "text-lime-300"
     },
 
 
+    // =========================
+    // TOP FRIEND
+    // =========================
+
     {
+      type: "friend",
+
       emoji: "🫂",
+
       eyebrow:
         "YOUR TOP CONNECTION",
+
       title:
-        analytics.topFriend ||
+        a.topFriend ||
         "Your people",
+
       value:
-        analytics.topFriend
-          ? `${analytics.topFriends?.[0]?.count || 0}`
+        a.topFriend
+          ? `${a.topFriends?.[0]?.count || 0}`
           : "—",
+
       suffix:
-        analytics.topFriend
+        a.topFriend
           ? "messages together"
           : "",
+
       description:
         "Some conversations clearly mattered more than others.",
+
       accent:
         "text-pink-300"
     },
 
 
+    // =========================
+    // LIKES
+    // =========================
+
     {
+      type: "likes",
+
       emoji: "❤️",
+
       eyebrow:
         "YOUR LIKES",
+
       title:
         "You showed some love.",
+
       value:
-        analytics.likesGiven.toLocaleString(),
+        a.likesGiven.toLocaleString(),
+
       suffix:
         "likes",
+
       description:
         "Scrolling was never just scrolling.",
+
       accent:
         "text-red-400"
     },
 
 
+    // =========================
+    // CONTENT
+    // =========================
+
     {
+      type: "content",
+
       emoji: "📸",
+
       eyebrow:
         "YOUR CONTENT",
+
       title:
         "You were creating.",
-      value: (
-        analytics.postsCount +
-        analytics.storiesCount +
-        analytics.reelsCount
-      ).toLocaleString(),
+
+      value:
+        totalContent.toLocaleString(),
+
       suffix:
         "pieces of content",
+
       description:
         "Posts, stories and reels made up your year.",
+
       accent:
         "text-yellow-300"
     },
 
 
+    // =========================
+    // CREATOR MOMENT
+    // =========================
+
     {
+      type: "month",
+
       emoji: "📅",
+
       eyebrow:
         "YOUR CREATOR MOMENT",
+
       title:
-        analytics.mostActiveMonth !== "—"
-          ? analytics.mostActiveMonth
+        a.mostActiveMonth !== "—"
+          ? a.mostActiveMonth
           : "Your creative side",
+
       value:
-        analytics.postsCount > 0
-          ? analytics.postsCount.toLocaleString()
+        a.postsCount > 0
+          ? a.postsCount.toLocaleString()
           : "—",
+
       suffix:
-        analytics.postsCount > 0
+        a.postsCount > 0
           ? "posts across the year"
           : "",
+
       description:
         "That's when your creator energy showed up the most.",
+
       accent:
         "text-yellow-300"
     },
 
 
+    // =========================
+    // CONNECTIONS
+    // =========================
+
     {
+      type: "connections",
+
       emoji: "👥",
+
       eyebrow:
         "YOUR CONNECTIONS",
+
       title:
         "Your Instagram circle",
+
       value:
-        analytics.followersCount.toLocaleString(),
+        a.followersCount.toLocaleString(),
+
       suffix:
         "followers",
+
       description:
         "A snapshot of the people connected to you.",
+
       accent:
         "text-blue-300"
     },
 
 
+    // =========================
+    // PERSONALITY
+    // =========================
+
     {
-      emoji: "✨",
+      type: "personality",
+
+      emoji:
+        personalityEmoji,
+
       eyebrow:
         "YOUR INSTAGRAM VIBE",
+
       title:
-        analytics.messagesCount > 10000
-          ? "Social Builder"
-          : analytics.likesGiven > 20000
-          ? "Like Machine"
-          : analytics.likesGiven >
-            analytics.sentMessages
-          ? "Silent Observer"
-          : analytics.postsCount < 5
-          ? "Ghost Poster"
-          : analytics.topFriend
-          ? "Loyal Friend"
-          : "Quiet Observer",
+        personality,
+
       value:
         "YOU",
+
       description:
         "Your activity says something about how you experienced Instagram.",
+
       accent:
         "text-purple-300"
     },
 
 
+    // =========================
+    // FINAL
+    // =========================
+
     {
-      emoji: "✨",
+      type: "final",
+
+      emoji:
+        "✨",
+
       eyebrow:
         "YOUR YEAR",
+
       title:
         "That's a wrap.",
+
       value:
         "YOU",
+
       description:
         "Your Instagram had its own story. This was yours.",
+
       accent:
         "text-lime-300"
     }
@@ -230,16 +373,12 @@ function WrappedStories({
   ];
 
 
-  // =========================
-  // CURRENT SLIDE
-  // =========================
-
   const slide =
     slides[current];
 
 
   // =========================
-  // NEXT SLIDE
+  // NEXT
   // =========================
 
   function nextSlide() {
@@ -259,7 +398,7 @@ function WrappedStories({
 
 
   // =========================
-  // PREVIOUS SLIDE
+  // PREVIOUS
   // =========================
 
   function previousSlide() {
@@ -283,22 +422,20 @@ function WrappedStories({
 
   useEffect(() => {
 
-    // Stop auto-play
-    // on final slide.
-
     if (
       current >=
       slides.length - 1
     ) {
+
       return;
+
     }
 
 
-    // Stop timer
-    // while paused.
-
     if (isPaused) {
+
       return;
+
     }
 
 
@@ -306,7 +443,7 @@ function WrappedStories({
       setTimeout(() => {
 
         setCurrent(
-          (previous) =>
+          previous =>
             previous + 1
         );
 
@@ -327,7 +464,7 @@ function WrappedStories({
 
 
   // =========================
-  // KEYBOARD CONTROLS
+  // KEYBOARD
   // =========================
 
   useEffect(() => {
@@ -338,9 +475,8 @@ function WrappedStories({
 
       if (
         event.key ===
-        "ArrowRight" ||
-        event.key ===
-        " "
+          "ArrowRight" ||
+        event.key === " "
       ) {
 
         event.preventDefault();
@@ -392,13 +528,19 @@ function WrappedStories({
     };
 
   }, [
-    current
+    current,
+    slides.length,
+    onClose
   ]);
 
 
   // =========================
-  // UI
+  // MAIN UI
   // =========================
+
+  if (!analytics) {
+    return null;
+  }
 
   return (
 
@@ -421,9 +563,8 @@ function WrappedStories({
       }
     >
 
-
       {/* =========================
-          BACKGROUND GLOW
+          BACKGROUND
           ========================= */}
 
       <div
@@ -486,7 +627,7 @@ function WrappedStories({
 
 
         {/* =========================
-            CLOSE BUTTON
+            CLOSE
             ========================= */}
 
         <button
@@ -508,7 +649,7 @@ function WrappedStories({
 
 
         {/* =========================
-            PROGRESS BARS
+            PROGRESS
             ========================= */}
 
         <div
@@ -557,8 +698,7 @@ function WrappedStories({
                     duration:
                       index === current &&
                       !isPaused
-                        ? STORY_DURATION /
-                          1000
+                        ? STORY_DURATION / 1000
                         : 0.2,
                     ease:
                       "linear"
@@ -574,7 +714,7 @@ function WrappedStories({
 
 
         {/* =========================
-            PAUSED INDICATOR
+            PAUSED
             ========================= */}
 
         {isPaused &&
@@ -604,7 +744,7 @@ function WrappedStories({
 
 
         {/* =========================
-            LEFT TAP ZONE
+            LEFT TAP
             ========================= */}
 
         <div
@@ -623,7 +763,7 @@ function WrappedStories({
 
 
         {/* =========================
-            RIGHT TAP ZONE
+            RIGHT TAP
             ========================= */}
 
         <div
@@ -642,7 +782,7 @@ function WrappedStories({
 
 
         {/* =========================
-            MAIN STORY
+            STORY CONTENT
             ========================= */}
 
         <div
@@ -662,125 +802,1110 @@ function WrappedStories({
 
             <motion.div
               key={current}
-
               initial={{
                 opacity: 0,
-                x: 50
+                scale: 0.94,
+                y: 20
               }}
-
               animate={{
                 opacity: 1,
-                x: 0
+                scale: 1,
+                y: 0
               }}
-
               exit={{
                 opacity: 0,
-                x: -50
+                scale: 1.03,
+                y: -20
               }}
-
               transition={{
-                duration: 0.4
+                duration: 0.45
               }}
-
               className="
                 text-center
                 w-full
+                max-w-2xl
               "
             >
 
 
-              {/* EMOJI */}
+              {/* =====================================================
+                  INTRO
+                  ===================================================== */}
 
-              <div
-                className="
-                  text-7xl
-                  md:text-8xl
-                  mb-8
-                "
-              >
-                {slide.emoji}
-              </div>
+              {slide.type === "intro" && (
 
+                <div>
 
-              {/* EYEBROW */}
-
-              <p
-                className="
-                  text-sm
-                  md:text-base
-                  uppercase
-                  tracking-[0.3em]
-                  text-gray-400
-                  font-bold
-                "
-              >
-                {slide.eyebrow}
-              </p>
-
-
-              {/* TITLE */}
-
-              <h1
-                className="
-                  text-4xl
-                  md:text-6xl
-                  font-black
-                  mt-6
-                "
-              >
-                {slide.title}
-              </h1>
+                  <motion.div
+                    animate={{
+                      rotate: [0, -8, 8, 0],
+                      scale: [1, 1.08, 1]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 2
+                    }}
+                    className="
+                      text-8xl
+                      md:text-[120px]
+                      mb-8
+                    "
+                  >
+                    {slide.emoji}
+                  </motion.div>
 
 
-              {/* MAIN VALUE */}
-
-              <div
-                className={`
-                  text-6xl
-                  md:text-8xl
-                  font-black
-                  mt-8
-                  ${slide.accent}
-                `}
-              >
-                {slide.value}
-              </div>
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.35em]
+                      text-lime-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
 
 
-              {/* SUFFIX */}
+                  <h1
+                    className="
+                      text-6xl
+                      md:text-8xl
+                      font-black
+                      mt-5
+                    "
+                  >
+                    {slide.title}
+                  </h1>
 
-              {slide.suffix && (
 
-                <p
-                  className="
-                    text-xl
-                    md:text-2xl
-                    text-gray-300
-                    mt-3
-                    font-semibold
-                  "
-                >
-                  {slide.suffix}
-                </p>
+                  <div
+                    className="
+                      text-5xl
+                      md:text-7xl
+                      font-black
+                      text-[#d8cfb5]
+                      mt-5
+                    "
+                  >
+                    {slide.value}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-gray-400
+                      text-lg
+                      mt-7
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+                </div>
 
               )}
 
 
-              {/* DESCRIPTION */}
+              {/* =====================================================
+                  MESSAGES
+                  ===================================================== */}
 
-              <p
-                className="
-                  text-gray-500
-                  text-base
-                  md:text-lg
-                  mt-8
-                  max-w-lg
-                  mx-auto
-                "
-              >
-                {slide.description}
-              </p>
+              {slide.type === "messages" && (
 
+                <div>
+
+                  <div
+                    className="
+                      inline-flex
+                      items-center
+                      justify-center
+                      w-28
+                      h-28
+                      md:w-36
+                      md:h-36
+                      rounded-full
+                      bg-lime-300/10
+                      border
+                      border-lime-300/20
+                      text-6xl
+                      md:text-7xl
+                      mb-8
+                    "
+                  >
+                    {slide.emoji}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-gray-400
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-4xl
+                      md:text-5xl
+                      font-black
+                      mt-5
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      text-7xl
+                      md:text-[110px]
+                      font-black
+                      text-lime-300
+                      mt-6
+                      leading-none
+                    "
+                  >
+                    {slide.value}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-xl
+                      md:text-2xl
+                      font-bold
+                      text-white
+                      mt-4
+                    "
+                  >
+                    {slide.suffix}
+                  </p>
+
+
+                  <div
+                    className="
+                      mt-8
+                      mx-auto
+                      max-w-md
+                      p-5
+                      rounded-2xl
+                      bg-white/5
+                      border
+                      border-white/10
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                      "
+                    >
+                      {slide.description}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  TOP FRIEND
+                  ===================================================== */}
+
+              {slide.type === "friend" && (
+
+                <div>
+
+                  <div
+                    className="
+                      relative
+                      mx-auto
+                      w-32
+                      h-32
+                      md:w-40
+                      md:h-40
+                      rounded-full
+                      bg-pink-400/10
+                      border
+                      border-pink-300/30
+                      flex
+                      items-center
+                      justify-center
+                      text-7xl
+                      mb-8
+                    "
+                  >
+
+                    {slide.emoji}
+
+                    <div
+                      className="
+                        absolute
+                        -right-2
+                        -top-2
+                        w-10
+                        h-10
+                        rounded-full
+                        bg-pink-300
+                        text-black
+                        flex
+                        items-center
+                        justify-center
+                        text-lg
+                      "
+                    >
+                      ♥
+                    </div>
+
+                  </div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-pink-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-4xl
+                      md:text-6xl
+                      font-black
+                      mt-5
+                      break-words
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      text-6xl
+                      md:text-8xl
+                      font-black
+                      text-pink-300
+                      mt-6
+                    "
+                  >
+                    {slide.value}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-xl
+                      md:text-2xl
+                      text-gray-300
+                      font-bold
+                      mt-2
+                    "
+                  >
+                    {slide.suffix}
+                  </p>
+
+
+                  <p
+                    className="
+                      text-gray-500
+                      mt-7
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  LIKES
+                  ===================================================== */}
+
+              {slide.type === "likes" && (
+
+                <div>
+
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.18, 1]
+                    }}
+                    transition={{
+                      duration: 1.4,
+                      repeat: Infinity,
+                      repeatDelay: 1
+                    }}
+                    className="
+                      text-8xl
+                      md:text-[130px]
+                      mb-6
+                    "
+                  >
+                    {slide.emoji}
+                  </motion.div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-red-400
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-4xl
+                      md:text-5xl
+                      font-black
+                      mt-5
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      text-7xl
+                      md:text-[110px]
+                      font-black
+                      text-red-400
+                      mt-6
+                      leading-none
+                    "
+                  >
+                    {slide.value}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-xl
+                      text-gray-300
+                      font-bold
+                      mt-3
+                    "
+                  >
+                    {slide.suffix}
+                  </p>
+
+
+                  <p
+                    className="
+                      text-gray-500
+                      mt-7
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  CONTENT
+                  ===================================================== */}
+
+              {slide.type === "content" && (
+
+                <div>
+
+                  <div
+                    className="
+                      text-7xl
+                      mb-6
+                    "
+                  >
+                    {slide.emoji}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-yellow-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-4xl
+                      md:text-5xl
+                      font-black
+                      mt-5
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      text-7xl
+                      md:text-[105px]
+                      font-black
+                      text-yellow-300
+                      mt-6
+                    "
+                  >
+                    {slide.value}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-xl
+                      font-bold
+                      text-gray-300
+                      mt-2
+                    "
+                  >
+                    {slide.suffix}
+                  </p>
+
+
+                  {/* CONTENT BREAKDOWN */}
+
+                  <div
+                    className="
+                      grid
+                      grid-cols-3
+                      gap-3
+                      max-w-lg
+                      mx-auto
+                      mt-8
+                    "
+                  >
+
+                    <div
+                      className="
+                        p-4
+                        rounded-2xl
+                        bg-white/5
+                        border
+                        border-white/10
+                      "
+                    >
+
+                      <div className="text-2xl">
+                        🎞️
+                      </div>
+
+                      <div
+                        className="
+                          text-2xl
+                          font-black
+                          mt-2
+                        "
+                      >
+                        {analytics.reelsCount}
+                      </div>
+
+                      <div
+                        className="
+                          text-[10px]
+                          uppercase
+                          text-gray-500
+                          font-bold
+                        "
+                      >
+                        Reels
+                      </div>
+
+                    </div>
+
+
+                    <div
+                      className="
+                        p-4
+                        rounded-2xl
+                        bg-white/5
+                        border
+                        border-white/10
+                      "
+                    >
+
+                      <div className="text-2xl">
+                        ▣
+                      </div>
+
+                      <div
+                        className="
+                          text-2xl
+                          font-black
+                          mt-2
+                        "
+                      >
+                        {analytics.postsCount}
+                      </div>
+
+                      <div
+                        className="
+                          text-[10px]
+                          uppercase
+                          text-gray-500
+                          font-bold
+                        "
+                      >
+                        Posts
+                      </div>
+
+                    </div>
+
+
+                    <div
+                      className="
+                        p-4
+                        rounded-2xl
+                        bg-white/5
+                        border
+                        border-white/10
+                      "
+                    >
+
+                      <div className="text-2xl">
+                        📖
+                      </div>
+
+                      <div
+                        className="
+                          text-2xl
+                          font-black
+                          mt-2
+                        "
+                      >
+                        {analytics.storiesCount}
+                      </div>
+
+                      <div
+                        className="
+                          text-[10px]
+                          uppercase
+                          text-gray-500
+                          font-bold
+                        "
+                      >
+                        Stories
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  CREATOR MONTH
+                  ===================================================== */}
+
+              {slide.type === "month" && (
+
+                <div>
+
+                  <div
+                    className="
+                      inline-flex
+                      items-center
+                      justify-center
+                      w-28
+                      h-28
+                      rounded-3xl
+                      bg-yellow-300/10
+                      border
+                      border-yellow-300/20
+                      text-6xl
+                      mb-8
+                    "
+                  >
+                    {slide.emoji}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-yellow-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <div
+                    className="
+                      text-5xl
+                      md:text-7xl
+                      font-black
+                      text-yellow-300
+                      mt-6
+                    "
+                  >
+                    {slide.title}
+                  </div>
+
+
+                  <div
+                    className="
+                      mt-8
+                      inline-block
+                      px-8
+                      py-5
+                      rounded-3xl
+                      bg-white/5
+                      border
+                      border-white/10
+                    "
+                  >
+
+                    <div
+                      className="
+                        text-5xl
+                        md:text-6xl
+                        font-black
+                      "
+                    >
+                      {slide.value}
+                    </div>
+
+                    <div
+                      className="
+                        text-gray-400
+                        mt-2
+                        font-semibold
+                      "
+                    >
+                      {slide.suffix}
+                    </div>
+
+                  </div>
+
+
+                  <p
+                    className="
+                      text-gray-500
+                      mt-7
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  CONNECTIONS
+                  ===================================================== */}
+
+              {slide.type === "connections" && (
+
+                <div>
+
+                  <div
+                    className="
+                      text-7xl
+                      mb-6
+                    "
+                  >
+                    {slide.emoji}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-blue-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-4xl
+                      md:text-5xl
+                      font-black
+                      mt-5
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      mt-8
+                      max-w-md
+                      mx-auto
+                      rounded-3xl
+                      bg-blue-300/5
+                      border
+                      border-blue-300/20
+                      p-8
+                    "
+                  >
+
+                    <div
+                      className="
+                        text-6xl
+                        md:text-8xl
+                        font-black
+                        text-blue-300
+                      "
+                    >
+                      {slide.value}
+                    </div>
+
+
+                    <div
+                      className="
+                        text-xl
+                        text-gray-300
+                        font-bold
+                        mt-2
+                      "
+                    >
+                      {slide.suffix}
+                    </div>
+
+
+                    <div
+                      className="
+                        mt-6
+                        flex
+                        justify-center
+                        gap-8
+                        text-sm
+                      "
+                    >
+
+                      <div>
+
+                        <div
+                          className="
+                            text-2xl
+                            font-black
+                          "
+                        >
+                          {analytics.followingCount}
+                        </div>
+
+                        <div
+                          className="
+                            text-gray-500
+                            uppercase
+                            text-[10px]
+                            font-bold
+                          "
+                        >
+                          Following
+                        </div>
+
+                      </div>
+
+
+                      <div>
+
+                        <div
+                          className="
+                            text-2xl
+                            font-black
+                          "
+                        >
+                          {analytics.mutualFollowers}
+                        </div>
+
+                        <div
+                          className="
+                            text-gray-500
+                            uppercase
+                            text-[10px]
+                            font-bold
+                          "
+                        >
+                          Mutuals
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+
+                  <p
+                    className="
+                      text-gray-500
+                      mt-7
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  PERSONALITY
+                  ===================================================== */}
+
+              {slide.type === "personality" && (
+
+                <div>
+
+                  <motion.div
+                    animate={{
+                      y: [0, -10, 0],
+                      rotate: [0, 4, -4, 0]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity
+                    }}
+                    className="
+                      text-8xl
+                      md:text-[120px]
+                      mb-8
+                    "
+                  >
+                    {slide.emoji}
+                  </motion.div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.3em]
+                      text-purple-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <p
+                    className="
+                      text-gray-400
+                      mt-5
+                      uppercase
+                      tracking-widest
+                      text-xs
+                    "
+                  >
+                    You were...
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-5xl
+                      md:text-7xl
+                      font-black
+                      text-purple-300
+                      mt-3
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      mt-8
+                      mx-auto
+                      max-w-md
+                      p-6
+                      rounded-3xl
+                      bg-purple-400/10
+                      border
+                      border-purple-300/20
+                    "
+                  >
+
+                    <div
+                      className="
+                        text-gray-400
+                        text-sm
+                      "
+                    >
+                      YOUR INSTAGRAM PERSONALITY
+                    </div>
+
+                    <div
+                      className="
+                        text-2xl
+                        font-black
+                        mt-2
+                      "
+                    >
+                      {slide.value}
+                    </div>
+
+                  </div>
+
+
+                  <p
+                    className="
+                      text-gray-500
+                      mt-7
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+                </div>
+
+              )}
+
+
+              {/* =====================================================
+                  FINAL
+                  ===================================================== */}
+
+              {slide.type === "final" && (
+
+                <div>
+
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.15, 1],
+                      rotate: [0, 8, -8, 0]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 1
+                    }}
+                    className="
+                      text-8xl
+                      md:text-[140px]
+                      mb-8
+                    "
+                  >
+                    {slide.emoji}
+                  </motion.div>
+
+
+                  <p
+                    className="
+                      text-sm
+                      uppercase
+                      tracking-[0.35em]
+                      text-lime-300
+                      font-bold
+                    "
+                  >
+                    {slide.eyebrow}
+                  </p>
+
+
+                  <h1
+                    className="
+                      text-5xl
+                      md:text-7xl
+                      font-black
+                      mt-6
+                    "
+                  >
+                    {slide.title}
+                  </h1>
+
+
+                  <div
+                    className="
+                      text-7xl
+                      md:text-[120px]
+                      font-black
+                      text-lime-300
+                      mt-6
+                    "
+                  >
+                    {slide.value}
+                  </div>
+
+
+                  <p
+                    className="
+                      text-gray-400
+                      text-lg
+                      mt-7
+                      max-w-lg
+                      mx-auto
+                    "
+                  >
+                    {slide.description}
+                  </p>
+
+
+                  <button
+                    onClick={onClose}
+                    className="
+                      mt-10
+                      px-8
+                      py-4
+                      rounded-full
+                      bg-lime-300
+                      text-black
+                      font-black
+                      hover:scale-105
+                      transition
+                    "
+                  >
+                    Back to Dashboard
+                  </button>
+
+                </div>
+
+              )}
 
             </motion.div>
 
@@ -802,9 +1927,6 @@ function WrappedStories({
             z-20
           "
         >
-
-
-          {/* BACK */}
 
           <button
             onClick={previousSlide}
@@ -831,12 +1953,8 @@ function WrappedStories({
           </button>
 
 
-          {/* COUNTER */}
-
           <div
             className="
-              relative
-              z-20
               flex
               flex-col
               items-center
@@ -875,8 +1993,6 @@ function WrappedStories({
           </div>
 
 
-          {/* NEXT */}
-
           <button
             onClick={nextSlide}
             disabled={
@@ -901,9 +2017,7 @@ function WrappedStories({
             Next →
           </button>
 
-
         </div>
-
 
       </div>
 

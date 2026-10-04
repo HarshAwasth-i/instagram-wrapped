@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { InstagramContext } from "../../context/InstagramContext";
 
 function ConnectionsSection() {
-  const { analytics, selectedYear } =
+  const { analytics } =
     useContext(InstagramContext);
 
   if (!analytics) {

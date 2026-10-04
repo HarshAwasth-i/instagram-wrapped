@@ -314,24 +314,6 @@ likedContent.push({
 });
 
           // =========================
-          // MONTHLY LIKES
-          // =========================
-
-          if (like.timestamp) {
-            const date = new Date(like.timestamp * 1000);
-
-            const month = date.getMonth();
-            monthLikes[month]++;
-
-            // =========================
-            // HOURLY LIKES
-            // =========================
-
-            const hour = date.getHours();
-            hourLikes[hour]++;
-          }
-
-          // =========================
           // ACCOUNT NAME
           // =========================
 
@@ -426,6 +408,12 @@ likedContent.push({
     data.comments.forEach((item: any) => {
       if (Array.isArray(item)) {
         count += item.length;
+      } else if (item?.comments_media_comments && Array.isArray(item.comments_media_comments)) {
+        count += item.comments_media_comments.length;
+      } else if (typeof item === "object" && item !== null) {
+        Object.values(item).forEach((val: any) => {
+          if (Array.isArray(val)) count += val.length;
+        });
       }
     });
 
@@ -774,6 +762,33 @@ if (data.stories?.length) {
 
   });
 
+}
+
+
+// =========================
+// REELS
+// =========================
+
+if (data.reels?.length) {
+  data.reels.forEach((item: any) => {
+    const list = Array.isArray(item)
+      ? item
+      : item.ig_reels || item.ig_clips || [];
+
+    if (!Array.isArray(list)) return;
+
+    list.forEach((reel: any) => {
+      const ts =
+        reel.creation_timestamp ||
+        reel.timestamp;
+
+      if (!ts || !isInSelectedYear(ts)) return;
+
+      const month = new Date(ts * 1000).getMonth();
+      reelMonths[month]++;
+      analytics.reelsCount++;
+    });
+  });
 }
 
 
