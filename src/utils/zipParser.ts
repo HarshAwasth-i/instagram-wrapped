@@ -35,7 +35,7 @@ export async function parseInstagramZip(file: File) {
 
       const json = JSON.parse(content);
 
-      console.log("Reading:", path);
+      
 
 
       // -------------------------
@@ -149,15 +149,15 @@ else if (
 
 
     } catch (error) {
-      console.log("Skipping invalid JSON:", path);
+      
     }
 
   }
 
 
 
-  console.log("FINAL INSTAGRAM DATA:", instagramData);
-  console.log("DATA KEYS:", Object.keys(instagramData));
+  
+  
 
   return instagramData;
 

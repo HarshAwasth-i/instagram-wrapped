@@ -5,62 +5,84 @@ export const InstagramContext = createContext<any>(null);
 
 
 
-export function InstagramProvider({children}:any){
+export function InstagramProvider({ children }: any) {
 
 
-const savedAnalytics =
-localStorage.getItem("instagramAnalytics");
+  // =========================
+  // SAVED ANALYTICS
+  // =========================
+
+  const savedAnalytics =
+    localStorage.getItem("instagramAnalytics");
 
 
-
-const [analytics,setAnalyticsState] =
-useState(
-savedAnalytics 
-? JSON.parse(savedAnalytics)
-: null
-);
-
+  const [analytics, setAnalyticsState] =
+    useState(
+      savedAnalytics
+        ? JSON.parse(savedAnalytics)
+        : null
+    );
 
 
-const [instagramData,setInstagramData] =
-useState<any>(null);
+  // =========================
+  // RAW INSTAGRAM DATA
+  // =========================
+
+  const [instagramData, setInstagramData] =
+    useState<any>(null);
 
 
+  // =========================
+  // SELECTED YEAR
+  // =========================
+  //
+  // null = all years
+  //
 
-function setAnalytics(data:any){
-
-
-localStorage.setItem(
-"instagramAnalytics",
-JSON.stringify(data)
-);
-
-
-setAnalyticsState(data);
+  const [selectedYear, setSelectedYear] =
+    useState<number | null>(null);
 
 
-}
+  // =========================
+  // SET ANALYTICS
+  // =========================
+
+  function setAnalytics(data: any) {
+
+    localStorage.setItem(
+      "instagramAnalytics",
+      JSON.stringify(data)
+    );
 
 
+    setAnalyticsState(data);
 
-return(
+  }
 
-<InstagramContext.Provider
 
-value={{
-analytics,
-setAnalytics,
-instagramData,
-setInstagramData
-}}
+  return (
 
->
+    <InstagramContext.Provider
 
-{children}
+      value={{
 
-</InstagramContext.Provider>
+        analytics,
+        setAnalytics,
 
-)
+        instagramData,
+        setInstagramData,
 
+        selectedYear,
+        setSelectedYear
+
+      }}
+
+    >
+
+      {children}
+
+    </InstagramContext.Provider>
+
+  );
 
 }

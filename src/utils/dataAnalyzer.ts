@@ -5,8 +5,28 @@ function cleanText(text: string) {
     return text;
   }
 }
+export function analyzeInstagramData(
+  data: any,
+  selectedYear?: number
+) {  
+    // =========================
+  // YEAR FILTER
+  // =========================
 
-export function analyzeInstagramData(data: any) {
+  const isInSelectedYear = (
+    timestamp: number,
+    isMilliseconds = false
+  ) => {
+    if (!selectedYear) return true;
+
+    const date = new Date(
+      isMilliseconds
+        ? timestamp
+        : timestamp * 1000
+    );
+
+    return date.getFullYear() === selectedYear;
+  };
   const analytics: any = {
     followersCount: 0,
     followingCount: 0,
@@ -211,7 +231,24 @@ export function analyzeInstagramData(data: any) {
     data.likes.forEach((item: any) => {
       if (Array.isArray(item)) {
         item.forEach((like: any) => {
+            if (
+    like.timestamp &&
+    !isInSelectedYear(like.timestamp)
+  ) {
+    return;
+  }
           count++;
+
+                // Monthly likes
+      if (like.timestamp) {
+        const date = new Date(like.timestamp * 1000);
+        const month = date.getMonth();
+        monthLikes[month]++;
+
+        // Hourly likes
+        const hour = date.getHours();
+        hourLikes[hour]++;
+      }
 
           // =========================
           // STORE LIKED POST
@@ -395,293 +432,633 @@ likedContent.push({
     analytics.commentsCount = count;
   }
 
-  // =========================
-  // MESSAGES
-  // =========================
+// =========================
+// MESSAGES
+// =========================
 
-  let friendMap: any = {};
+let friendMap: any = {};
 
-  // --- Step 1: detect who the account owner is ---
-  // The owner is the person who appears most as sender_name across all chats.
-  // We do a pre-pass to count occurrences.
-  let senderTotals: any = {};
+// --- Step 1: detect who the account owner is ---
+// We keep this across all messages so the
+// sender identification remains consistent.
+let senderTotals: any = {};
 
-  if (data.messages?.length) {
-    data.messages.forEach((chat: any) => {
-      if (!chat.messages) return;
+if (data.messages?.length) {
 
-      chat.messages.forEach((msg: any) => {
-        if (msg.sender_name) {
-          senderTotals[msg.sender_name] =
-            (senderTotals[msg.sender_name] || 0) + 1;
-        }
-      });
+  data.messages.forEach((chat: any) => {
+
+    if (!chat.messages) return;
+
+    chat.messages.forEach((msg: any) => {
+
+      if (msg.sender_name) {
+
+        senderTotals[msg.sender_name] =
+          (senderTotals[msg.sender_name] || 0) + 1;
+
+      }
+
     });
-  }
 
-  // The owner is the sender with the highest count.
-  const ownerName: string =
-    Object.entries(senderTotals).sort(
-      (a: any, b: any) => b[1] - a[1]
-    )[0]?.[0] || "";
+  });
 
-  if (data.messages?.length) {
-    data.messages.forEach((chat: any) => {
-      if (!chat.messages) return;
+}
+
+
+// The owner is the sender with the highest
+// number of messages.
+const ownerName: string =
+  Object.entries(senderTotals).sort(
+    (a: any, b: any) => b[1] - a[1]
+  )[0]?.[0] || "";
+
+
+if (data.messages?.length) {
+
+  data.messages.forEach((chat: any) => {
+
+    if (!chat.messages) return;
+
+    // Track whether this conversation has
+    // at least one message in the selected year.
+    let hasMessagesInSelectedYear = false;
+
+
+    chat.messages.forEach((msg: any) => {
+
+      // =========================
+      // YEAR FILTER
+      // =========================
+
+      if (
+        msg.timestamp_ms &&
+        !isInSelectedYear(
+          msg.timestamp_ms,
+          true
+        )
+      ) {
+        return;
+      }
+
+
+      // Count this message
+      analytics.messagesCount++;
+
+
+      hasMessagesInSelectedYear = true;
+
+
+      // =========================
+      // HOUR ACTIVITY
+      // =========================
+
+      if (msg.timestamp_ms) {
+
+        const hour = new Date(
+          msg.timestamp_ms
+        ).getHours();
+
+        analytics.hourActivity[hour]++;
+
+      }
+
+
+      // =========================
+      // SENT VS RECEIVED
+      // =========================
+
+      if (msg.sender_name === ownerName) {
+
+        analytics.sentMessages++;
+
+      }
+
+      else {
+
+        analytics.receivedMessages++;
+
+
+        // Track friends only for the
+        // selected year's messages.
+        friendMap[msg.sender_name] =
+          (friendMap[msg.sender_name] || 0) + 1;
+
+      }
+
+
+      // =========================
+      // FIRST / LAST MESSAGE
+      // =========================
+
+      if (msg.timestamp_ms) {
+
+        const date =
+          new Date(msg.timestamp_ms);
+
+
+        const messageData = {
+
+          text: cleanText(
+            msg.content ||
+            "Media message"
+          ),
+
+          date,
+
+          friend: cleanText(
+            msg.sender_name ||
+            "Unknown"
+          ),
+
+        };
+
+
+        // Earliest message in selected year
+        if (
+          !analytics.firstMessage ||
+          date < analytics.firstMessage.date
+        ) {
+
+          analytics.firstMessage =
+            messageData;
+
+        }
+
+
+        // Latest message in selected year
+        if (
+          !analytics.lastMessage ||
+          date > analytics.lastMessage.date
+        ) {
+
+          analytics.lastMessage =
+            messageData;
+
+        }
+
+      }
+
+    });
+
+
+    // =========================
+    // CONVERSATIONS
+    // =========================
+
+    // Only count conversations that actually
+    // contain a message from the selected year.
+    if (hasMessagesInSelectedYear) {
 
       analytics.conversationCount++;
 
-      chat.messages.forEach((msg: any) => {
-        analytics.messagesCount++;
+    }
 
-        // Hour activity
-        if (msg.timestamp_ms) {
-          const hour = new Date(
-            msg.timestamp_ms
-          ).getHours();
+  });
 
-          analytics.hourActivity[hour]++;
-        }
+}
 
-        // Sent vs received
-        if (msg.sender_name === ownerName) {
-          analytics.sentMessages++;
-        } else {
-          analytics.receivedMessages++;
 
-          friendMap[msg.sender_name] =
-            (friendMap[msg.sender_name] || 0) + 1;
-        }
+// =========================
+// TOP FRIEND
+// =========================
 
-        // First / last message
-        if (msg.timestamp_ms) {
-          const date = new Date(msg.timestamp_ms);
+analytics.topFriends =
+  Object.entries(friendMap)
 
-          const messageData = {
-            text: cleanText(
-              msg.content || "Media message"
-            ),
-            date,
-            friend: cleanText(
-              msg.sender_name || "Unknown"
-            ),
-          };
+    .sort(
+      (a: any, b: any) =>
+        b[1] - a[1]
+    )
 
-          if (
-            !analytics.firstMessage ||
-            date < analytics.firstMessage.date
-          ) {
-            analytics.firstMessage = messageData;
-          }
-
-          if (
-            !analytics.lastMessage ||
-            date > analytics.lastMessage.date
-          ) {
-            analytics.lastMessage = messageData;
-          }
-        }
-      });
-    });
-  }
-
-  // =========================
-  // TOP FRIEND
-  // =========================
-
-  analytics.topFriends = Object.entries(friendMap)
-    .sort((a: any, b: any) => b[1] - a[1])
     .slice(0, 5)
-    .map(([name, count]: any) => ({
-      name: cleanText(name),
-      count,
-    }));
 
-  analytics.topFriend =
-    analytics.topFriends[0]?.name || "";
+    .map(
+      ([name, count]: any) => ({
 
-  console.log(
-    "TOP FRIENDS:",
-    analytics.topFriends
+        name: cleanText(name),
+
+        count,
+
+      })
+    );
+
+
+analytics.topFriend =
+  analytics.topFriends[0]?.name || "";
+
+
+
+
+// =========================
+// CONTENT ANALYTICS
+// =========================
+
+const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+
+let postMonths = Array(12).fill(0);
+let storyMonths = Array(12).fill(0);
+let reelMonths = Array(12).fill(0);
+
+
+// =========================
+// POSTS
+// =========================
+
+if (data.posts?.length) {
+
+  data.posts.forEach((item: any) => {
+
+    if (!Array.isArray(item)) return;
+
+
+    item.forEach((post: any) => {
+
+      if (!post.timestamp) return;
+
+
+      // Ignore posts outside selected year
+      if (
+        !isInSelectedYear(
+          post.timestamp
+        )
+      ) {
+        return;
+      }
+
+
+      const date =
+        new Date(
+          post.timestamp * 1000
+        );
+
+
+      const month =
+        date.getMonth();
+
+
+      postMonths[month]++;
+
+      analytics.postsCount++;
+
+    });
+
+  });
+
+}
+
+
+// =========================
+// STORIES
+// =========================
+
+if (data.stories?.length) {
+
+  data.stories.forEach((file: any) => {
+
+    if (
+      !file.ig_stories ||
+      !Array.isArray(file.ig_stories)
+    ) {
+      return;
+    }
+
+
+    file.ig_stories.forEach(
+      (story: any) => {
+
+        if (!story.creation_timestamp) {
+          return;
+        }
+
+
+        // Ignore stories outside selected year
+        if (
+          !isInSelectedYear(
+            story.creation_timestamp
+          )
+        ) {
+          return;
+        }
+
+
+        const date =
+          new Date(
+            story.creation_timestamp * 1000
+          );
+
+
+        const month =
+          date.getMonth();
+
+
+        storyMonths[month]++;
+
+        analytics.storiesCount++;
+
+      }
+    );
+
+  });
+
+}
+
+
+// =========================
+// CONTENT TIMELINE
+// =========================
+
+analytics.contentTimeline = {
+
+  posts: postMonths,
+
+  stories: storyMonths,
+
+  reels: reelMonths,
+
+};
+
+
+// =========================
+// MOST ACTIVE MONTH
+// =========================
+
+const maxPost =
+  Math.max(...postMonths);
+
+
+analytics.mostActiveMonth =
+  maxPost > 0
+    ? monthNames[
+        postMonths.indexOf(maxPost)
+      ]
+    : "—";
+
+
+// =========================
+// PEAK STORY MONTH
+// =========================
+
+const maxStory =
+  Math.max(...storyMonths);
+
+
+analytics.peakStoryMonth =
+  maxStory > 0
+    ? monthNames[
+        storyMonths.indexOf(maxStory)
+      ]
+    : "—";
+
+// =========================
+// SEARCH ANALYTICS
+// =========================
+
+let searchMap: any = {};
+
+if (data.searches?.length) {
+
+  data.searches.forEach((file: any) => {
+
+    // =========================
+    // PROFILE SEARCHES
+    // =========================
+
+    if (file.searches_user) {
+
+      file.searches_user.forEach((item: any) => {
+
+        const username = item.title;
+
+        if (!username) {
+          return;
+        }
+
+        // Instagram stores the timestamp
+        // inside string_list_data
+        const searchData =
+          item.string_list_data?.[0];
+
+        const timestamp =
+          searchData?.timestamp;
+
+        // If a year is selected,
+        // only count timestamped searches.
+        if (
+          selectedYear &&
+          !timestamp
+        ) {
+          return;
+        }
+
+        // Filter by selected year
+        if (
+          timestamp &&
+          !isInSelectedYear(timestamp)
+        ) {
+          return;
+        }
+
+        searchMap[username] =
+          (searchMap[username] || 0) + 1;
+
+      });
+
+    }
+
+
+    // =========================
+    // SEARCH QUERY FORMAT
+    // =========================
+
+    if (file.label_values) {
+
+      let searchQuery = "";
+      let timestamp = 0;
+
+      file.label_values.forEach(
+        (item: any) => {
+
+          // Actual searched text
+          if (
+            item.label === "Search query"
+          ) {
+            searchQuery =
+              item.value || "";
+          }
+
+          // Actual search timestamp
+          if (
+            item.label === "Update time"
+          ) {
+            timestamp =
+              item.timestamp_value || 0;
+          }
+
+        }
+      );
+
+
+      if (!searchQuery) {
+        return;
+      }
+
+      // If a year is selected,
+      // ignore records without timestamps.
+      if (
+        selectedYear &&
+        !timestamp
+      ) {
+        return;
+      }
+
+      // Filter by selected year
+      if (
+        timestamp &&
+        !isInSelectedYear(timestamp)
+      ) {
+        return;
+      }
+
+      searchMap[searchQuery] =
+        (searchMap[searchQuery] || 0) + 1;
+
+    }
+
+  });
+
+}
+
+
+// =========================
+// SEARCH RESULTS
+// =========================
+
+analytics.totalSearches =
+  Object.values(searchMap).reduce(
+    (sum: any, value: any) =>
+      sum + value,
+    0
+  ) as number;
+
+analytics.topSearches =
+  Object.entries(searchMap)
+    .sort(
+      (a: any, b: any) =>
+        b[1] - a[1]
+    )
+    .slice(0, 5)
+    .map(
+      ([username, count]: any) => ({
+        username: cleanText(username),
+        count,
+      })
+    );
+
+
+
+ // =========================
+// LOGIN ACTIVITY
+// =========================
+
+if (data.loginActivity?.length) {
+
+  let loginDates: string[] = [];
+
+
+  data.loginActivity.forEach(
+    (item: any) => {
+
+      Object.values(item).forEach(
+        (value: any) => {
+
+          if (!Array.isArray(value)) {
+            return;
+          }
+
+
+          value.forEach(
+            (entry: any) => {
+
+              if (!entry.title) {
+                return;
+              }
+
+
+              // Instagram login history stores
+              // the login date inside "title".
+              const loginTimestamp =
+                new Date(
+                  entry.title
+                ).getTime();
+
+
+              // Ignore invalid dates
+              if (
+                Number.isNaN(
+                  loginTimestamp
+                )
+              ) {
+                return;
+              }
+
+
+              // Convert milliseconds to seconds
+              // because isInSelectedYear()
+              // expects seconds by default.
+              if (
+                !isInSelectedYear(
+                  loginTimestamp,
+                  true
+                )
+              ) {
+                return;
+              }
+
+
+              loginDates.push(
+                entry.title
+              );
+
+            }
+          );
+
+        }
+      );
+
+    }
   );
 
-  // =========================
-  // CONTENT ANALYTICS
-  // =========================
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  analytics.totalLogins =
+    loginDates.length;
 
-  let postMonths = Array(12).fill(0);
-  let storyMonths = Array(12).fill(0);
-  let reelMonths = Array(12).fill(0);
 
-  // =========================
-  // POSTS
-  // =========================
+  // Keep the existing structure.
+  analytics.loginDevices =
+    loginDates.slice(0, 3);
 
-  if (data.posts?.length) {
-    data.posts.forEach((item: any) => {
-      if (Array.isArray(item)) {
-        item.forEach((post: any) => {
-          if (post.timestamp) {
-            const month = new Date(
-              post.timestamp * 1000
-            ).getMonth();
 
-            postMonths[month]++;
-            analytics.postsCount++;
-          }
-        });
-      }
-    });
-  }
+  // Your export does not provide
+  // reliable device information.
+  analytics.devicesUsed = 0;
 
-  // =========================
-  // STORIES
-  // =========================
+  analytics.mostUsedDevice = "";
 
-  if (data.stories?.length) {
-    data.stories.forEach((file: any) => {
-      // Instagram export format:
-      // { ig_stories: [...] }
-      if (
-        file.ig_stories &&
-        Array.isArray(file.ig_stories)
-      ) {
-        file.ig_stories.forEach((story: any) => {
-          if (story.creation_timestamp) {
-            const month = new Date(
-              story.creation_timestamp * 1000
-            ).getMonth();
-
-            storyMonths[month]++;
-            analytics.storiesCount++;
-          }
-        });
-      }
-    });
-  }
-
-  analytics.contentTimeline = {
-    posts: postMonths,
-    stories: storyMonths,
-    reels: reelMonths,
-  };
-
-  // Most active posting month
-  const maxPost = Math.max(...postMonths);
-
-  analytics.mostActiveMonth =
-    monthNames[postMonths.indexOf(maxPost)] || "—";
-
-  // Peak story month
-  const maxStory = Math.max(...storyMonths);
-
-  analytics.peakStoryMonth =
-    monthNames[storyMonths.indexOf(maxStory)] || "—";
-
-  // =========================
-  // SEARCH ANALYTICS
-  // =========================
-
-  let searchMap: any = {};
-
-  if (data.searches?.length) {
-    data.searches.forEach((file: any) => {
-      // Format A: file has a top-level array of search objects
-      if (Array.isArray(file)) {
-        file.forEach((item: any) => {
-          if (item.string_map_data) {
-            const value = Object.values(
-              item.string_map_data
-            )[0] as any;
-
-            if (value?.value) {
-              searchMap[value.value] =
-                (searchMap[value.value] || 0) + 1;
-            }
-          }
-        });
-      }
-
-      // Format B: file has searches_user array
-      else if (file.searches_user) {
-        file.searches_user.forEach((item: any) => {
-          const username = item.title;
-
-          if (username) {
-            searchMap[username] =
-              (searchMap[username] || 0) + 1;
-          }
-        });
-      }
-
-      // Format C: item itself has string_map_data
-      else if (file.string_map_data) {
-        const value = Object.values(
-          file.string_map_data
-        )[0] as any;
-
-        if (value?.value) {
-          searchMap[value.value] =
-            (searchMap[value.value] || 0) + 1;
-        }
-      }
-    });
-  }
-
-  analytics.totalSearches =
-    Object.values(searchMap).reduce(
-      (sum: any, val: any) => sum + val,
-      0
-    ) as number;
-
-  analytics.topSearches = Object.entries(searchMap)
-    .sort((a: any, b: any) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([username, count]: any) => ({
-      username: cleanText(username),
-      count,
-    }));
-
-  // =========================
-  // LOGIN ACTIVITY
-  // =========================
-
-  if (data.loginActivity?.length) {
-    let loginDates: string[] = [];
-
-    data.loginActivity.forEach((item: any) => {
-      Object.values(item).forEach((value: any) => {
-        if (Array.isArray(value)) {
-          value.forEach((entry: any) => {
-            if (entry.title) {
-              loginDates.push(entry.title);
-            }
-          });
-        }
-      });
-    });
-
-    analytics.totalLogins = loginDates.length;
-    analytics.loginDevices = loginDates.slice(0, 3);
-    analytics.devicesUsed = 0;
-    analytics.mostUsedDevice = "";
-  }
-
+}
   // =========================
   // PERSONALITY
   // =========================
