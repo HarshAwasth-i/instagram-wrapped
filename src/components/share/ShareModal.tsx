@@ -170,22 +170,22 @@ export default function ShareModal({
   // BLUR NAMES
   // =========================
 
-  function displayName(
-    name: string
-  ) {
-    if (!isBlurred) {
-      return name;
-    }
+  // function displayName(
+  //   name: string
+  // ) {
+  //   if (!isBlurred) {
+  //     return name;
+  //   }
 
-    return "••••••••";
-  }
+  //   return "••••••••";
+  // }
 
   return (
     <div
       className="
         fixed
         inset-0
-        z-[9999]
+      z-9999
         flex
         items-center
         justify-center
