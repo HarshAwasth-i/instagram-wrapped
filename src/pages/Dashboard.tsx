@@ -49,9 +49,10 @@ import WrappedStories
 import Background
   from "../components/layout/Background";
 
-import {
-  demoAnalytics
-} from "../utils/demoData";
+import ShareModal
+  from "../components/share/ShareModal";
+
+
 
 
 function Dashboard() {
@@ -72,6 +73,11 @@ function Dashboard() {
   const [
     showWrapped,
     setShowWrapped
+  ] = useState(false);
+
+  const [
+    showShare,
+    setShowShare
   ] = useState(false);
 
   const [
@@ -311,40 +317,8 @@ function Dashboard() {
   // SHARE
   // =========================
 
-  async function handleShare() {
-
-    try {
-
-      if (
-        navigator.share
-      ) {
-
-        await navigator.share({
-          title:
-            "My Instagram Wrapped",
-          text:
-            `My Instagram Wrapped ${selectedYear || ""}`,
-          url:
-            window.location.href
-        });
-
-      } else {
-
-        await navigator.clipboard.writeText(
-          window.location.href
-        );
-
-        alert(
-          "Link copied to clipboard!"
-        );
-
-      }
-
-    } catch {
-      // User cancelled share.
-      // No action needed.
-    }
-
+  function handleShare() {
+    setShowShare(true);
   }
 
 
@@ -404,14 +378,14 @@ function Dashboard() {
             Upload your Instagram data export to see your personalized year in review, or preview with sample data right now.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex justify-center">
 
             <button
               onClick={() =>
                 navigate("/")
               }
               className="
-                px-6
+                px-8
                 py-3.5
                 rounded-xl
                 bg-white/[0.05]
@@ -428,32 +402,6 @@ function Dashboard() {
               "
             >
               ← Go Home & Upload
-            </button>
-
-            <button
-              onClick={() => {
-                setAnalytics(demoAnalytics);
-                setSelectedYear(2026);
-              }}
-              className="
-                px-6
-                py-3.5
-                rounded-xl
-                bg-lime-400/18
-                border
-                border-lime-400/50
-                text-lime-300
-                font-bold
-                text-sm
-                backdrop-blur-md
-                hover:bg-lime-400/28
-                hover:border-lime-300
-                hover:shadow-[0_0_25px_rgba(190,242,100,0.22)]
-                transition-all
-                cursor-pointer
-              "
-            >
-              ⚡ Try Sample Demo
             </button>
 
           </div>
@@ -636,33 +584,6 @@ function Dashboard() {
 
             )
           )}
-
-          <button
-            onClick={() => navigate("/")}
-            className="
-              ml-1
-              px-3
-              md:px-4
-              py-2
-              rounded-lg
-              border
-              border-white/10
-              bg-white/[0.03]
-              text-gray-300
-              text-xs
-              md:text-sm
-              font-bold
-              backdrop-blur-md
-              hover:bg-white/[0.08]
-              hover:text-white
-              hover:border-white/20
-              transition-all
-              whitespace-nowrap
-              cursor-pointer
-            "
-          >
-            ← Upload New
-          </button>
 
           <button
             onClick={handleShare}
@@ -996,6 +917,14 @@ function Dashboard() {
         <WrappedStories
           onClose={() =>
             setShowWrapped(false)
+          }
+        />
+      )}
+
+      {showShare && (
+        <ShareModal
+          onClose={() =>
+            setShowShare(false)
           }
         />
       )}

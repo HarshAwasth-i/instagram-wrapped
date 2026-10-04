@@ -1,19 +1,7 @@
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import ChestUpload from "../components/upload/ChestUpload";
 import Background from "../components/layout/Background";
-import { InstagramContext } from "../context/InstagramContext";
-import { demoAnalytics } from "../utils/demoData";
 
 function Home() {
-  const navigate = useNavigate();
-  const { setAnalytics, setSelectedYear } = useContext(InstagramContext);
-
-  function handleTryDemo() {
-    setAnalytics(demoAnalytics);
-    setSelectedYear(2026);
-    navigate("/dashboard");
-  }
 
   return (
     <Background>
@@ -88,38 +76,6 @@ function Home() {
           <ChestUpload />
         </div>
 
-        {/* See-through Demo Button */}
-        <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
-          <button
-            onClick={handleTryDemo}
-            className="
-              px-6
-              py-3
-              rounded-xl
-              bg-lime-400/[0.12]
-              border
-              border-lime-400/40
-              text-lime-300
-              font-bold
-              text-xs
-              md:text-sm
-              backdrop-blur-xl
-              hover:bg-lime-400/[0.22]
-              hover:border-lime-300
-              hover:shadow-[0_0_25px_rgba(190,242,100,0.25)]
-              active:scale-95
-              transition-all
-              duration-300
-              cursor-pointer
-              flex
-              items-center
-              gap-2
-            "
-          >
-            <span>⚡</span>
-            <span>Try Sample Demo (Instant Preview)</span>
-          </button>
-        </div>
 
         {/* Privacy message */}
         <div className="
@@ -141,7 +97,7 @@ function Home() {
           text-gray-600
           text-center
         ">
-          Upload your Instagram data export ZIP or click Sample Demo to explore
+          Upload your Instagram data export ZIP to get your personalized year in review
         </p>
 
       </div>
