@@ -313,47 +313,108 @@ likedContent.push({
   timestamp,
 });
 
-          // =========================
-          // ACCOUNT NAME
-          // =========================
+// =========================
+// ACCOUNT NAME
+// =========================
 
-          let username = "";
+let username = "";
 
-          // New Instagram likes format
-          if (like.label_values?.length) {
-            like.label_values.forEach((label: any) => {
-              const value = label.value || "";
+// Try to extract username from Instagram URLs
+function extractUsername(value: string) {
+  if (!value || typeof value !== "string") {
+    return "";
+  }
 
-              // Only accept an actual Instagram profile URL
-              if (value.includes("instagram.com/u/")) {
-                const parts = value.split("/u/");
+  // Example:
+  // https://www.instagram.com/username/
+  // https://instagram.com/username/
+  // https://www.instagram.com/u/username/
 
-                if (parts[1]) {
-                  username = parts[1].split("/")[0];
-                }
-              }
-            });
-          }
+  if (value.includes("instagram.com")) {
+    try {
+      const url = new URL(
+        value.startsWith("http")
+          ? value
+          : `https://${value}`
+      );
 
-          // Fallback for older Instagram format
-          if (!username) {
-            username =
-              like.title ||
-              like.string_list_data?.[0]?.title ||
-              "";
-          }
+      const parts = url.pathname
+        .split("/")
+        .filter(Boolean);
 
-          // Only store a genuine-looking username
-          if (
-            username &&
-            !username.includes("instagram.com") &&
-            !username.includes("http") &&
-            !username.includes(" ") &&
-            username.length > 2
-          ) {
-            likedAccounts[username] =
-              (likedAccounts[username] || 0) + 1;
-          }
+      if (parts[0] === "u" && parts[1]) {
+        return parts[1];
+      }
+
+      if (parts[0] && parts[0] !== "_u") {
+        return parts[0];
+      }
+    } catch {
+      // Ignore invalid URLs
+    }
+  }
+
+  return "";
+}
+
+// New Instagram likes format
+if (like.label_values?.length) {
+  like.label_values.forEach((label: any) => {
+    const value = label.value || "";
+
+    const extracted =
+      extractUsername(value);
+
+    if (extracted) {
+      username = extracted;
+    }
+
+    // Some exports may directly provide
+    // the account name in the label
+    const labelName = (
+      label.label ||
+      label.name ||
+      ""
+    ).toLowerCase();
+
+    if (
+      !username &&
+      (
+        labelName.includes("username") ||
+        labelName.includes("account")
+      ) &&
+      value
+    ) {
+      username = value;
+    }
+  });
+}
+
+// Fallback for older Instagram formats
+if (!username) {
+  username =
+    like.title ||
+    like.string_list_data?.[0]?.title ||
+    "";
+}
+
+// Clean username if it accidentally contains
+// an Instagram URL
+username = username
+  .replace(/^@/, "")
+  .trim();
+
+// Only store a genuine-looking username
+if (
+  username &&
+  !username.includes("instagram.com") &&
+  !username.includes("http") &&
+  !username.includes(" ") &&
+  username.length > 2
+) {
+  likedAccounts[username] =
+    (likedAccounts[username] || 0) + 1;
+}
         });
       }
     });
