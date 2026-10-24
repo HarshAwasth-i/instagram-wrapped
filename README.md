@@ -1,5 +1,5 @@
 # 📸 Instagram Wrapped
-
+ 
 **Your Instagram. Your data. Your story.**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Instagram%20Wrapped-00C853?style=for-the-badge&logo=vercel&logoColor=white)](https://instagram-wrapped-tau.vercel.app/)
